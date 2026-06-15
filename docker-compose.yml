@@ -1,0 +1,247 @@
+version: "3.9"
+
+# ============================================================
+# PitchMind AI — Local Development Stack
+# ============================================================
+# Usage:
+#   make dev          → build + start all services
+#   make dev-infra    → start only infrastructure (db, redis, minio, mlflow)
+#   make logs         → tail all logs
+# ============================================================
+
+x-common-env: &common-env
+  APP_ENV: local
+  DATABASE_URL: postgresql+asyncpg://pitchmind:pitchmind_dev_pw@db:5432/pitchmind
+  REDIS_URL: redis://cache:6379/0
+  S3_ENDPOINT_URL: http://minio:9000
+  S3_ACCESS_KEY: minioadmin
+  S3_SECRET_KEY: minioadmin
+  S3_BUCKET_NAME: pitchmind
+  MLFLOW_TRACKING_URI: http://mlflow:5000
+
+services:
+
+  # ----------------------------------------------------------
+  # Infrastructure
+  # ----------------------------------------------------------
+
+  db:
+    image: pgvector/pgvector:pg16
+    environment:
+      POSTGRES_DB: pitchmind
+      POSTGRES_USER: pitchmind
+      POSTGRES_PASSWORD: pitchmind_dev_pw
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U pitchmind"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  cache:
+    image: redis:7-alpine
+    command: redis-server --save 60 1 --loglevel warning
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  minio:
+    image: minio/minio:latest
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    volumes:
+      - minio_data:/data
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  mlflow:
+    image: ghcr.io/mlflow/mlflow:v2.20.2
+    command: >
+      mlflow server
+      --backend-store-uri postgresql://pitchmind:pitchmind_dev_pw@db:5432/pitchmind
+      --default-artifact-root s3://pitchmind/mlflow
+      --host 0.0.0.0
+      --port 5000
+    environment:
+      <<: *common-env
+      AWS_ACCESS_KEY_ID: minioadmin
+      AWS_SECRET_ACCESS_KEY: minioadmin
+      MLFLOW_S3_ENDPOINT_URL: http://minio:9000
+    ports:
+      - "5000:5000"
+    depends_on:
+      db:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+
+  # ----------------------------------------------------------
+  # Application services (stubs in Phase 1; replace in later phases)
+  # ----------------------------------------------------------
+
+  api:
+    build:
+      context: .
+      dockerfile: infra/docker/api.Dockerfile
+    environment:
+      <<: *common-env
+    env_file:
+      - .env
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app/backend
+    depends_on:
+      db:
+        condition: service_healthy
+      cache:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/healthz"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  worker-cv:
+    build:
+      context: .
+      dockerfile: infra/docker/worker-cv.Dockerfile
+    environment:
+      <<: *common-env
+      CV_DEVICE: cpu          # override to 'cuda' for GPU dev
+    env_file:
+      - .env
+    volumes:
+      - ./backend:/app/backend
+    depends_on:
+      db:
+        condition: service_healthy
+      cache:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+
+  worker-ml:
+    build:
+      context: .
+      dockerfile: infra/docker/worker-ml.Dockerfile
+    environment:
+      <<: *common-env
+    env_file:
+      - .env
+    volumes:
+      - ./backend:/app/backend
+    depends_on:
+      db:
+        condition: service_healthy
+      cache:
+        condition: service_healthy
+      mlflow:
+        condition: service_started
+
+  agent:
+    build:
+      context: .
+      dockerfile: infra/docker/agent.Dockerfile
+    environment:
+      <<: *common-env
+    env_file:
+      - .env
+    ports:
+      - "8002:8002"
+    volumes:
+      - ./backend:/app/backend
+    depends_on:
+      db:
+        condition: service_healthy
+      cache:
+        condition: service_healthy
+
+  model-server:
+    build:
+      context: .
+      dockerfile: infra/docker/model-server.Dockerfile
+    environment:
+      <<: *common-env
+    env_file:
+      - .env
+    ports:
+      - "8001:8001"
+    volumes:
+      - ./model_server:/app/model_server
+    depends_on:
+      db:
+        condition: service_healthy
+      mlflow:
+        condition: service_started
+
+  web:
+    build:
+      context: .
+      dockerfile: infra/docker/web.Dockerfile
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./frontend:/app/frontend
+      - /app/frontend/node_modules
+    environment:
+      VITE_API_URL: http://localhost:8000
+
+  # ----------------------------------------------------------
+  # Observability
+  # ----------------------------------------------------------
+
+  prometheus:
+    image: prom/prometheus:v2.55.0
+    volumes:
+      - ./infra/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    ports:
+      - "9090:9090"
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+
+  grafana:
+    image: grafana/grafana:11.4.0
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: admin
+      GF_USERS_ALLOW_SIGN_UP: "false"
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./infra/grafana/provisioning:/etc/grafana/provisioning:ro
+    ports:
+      - "3001:3000"
+    depends_on:
+      - prometheus
+
+volumes:
+  postgres_data:
+  redis_data:
+  minio_data:
+  prometheus_data:
+  grafana_data:

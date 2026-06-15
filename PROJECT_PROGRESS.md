@@ -126,7 +126,13 @@ None yet — project has not started implementation.
 | Tag | Status | Date |
 | --- | --- | --- |
 | Planning docs complete | ✅ Done | 2026-06-15 |
+| Initial commit pushed to GitHub | ✅ Done | 2026-06-15 |
 | `v0.1.0` (Phases 1 – 4) | ⬜ Not started | — |
 | `v0.2.0` (Phases 5 – 7) | ⬜ Not started | — |
 | `v0.3.0` (MVP path) | ⬜ Not started | — |
 | `v1.0.0` MVP launch | ⬜ Not started | — |
+
+## Repository
+
+- **GitHub:** https://github.com/Pranshu0722/pitchmind-ai
+- **Default branch:** main

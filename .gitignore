@@ -1,0 +1,77 @@
+# === Python ===
+__pycache__/
+*.py[cod]
+*.pyo
+.venv/
+.uv/
+*.egg-info/
+dist/
+build/
+.eggs/
+*.egg
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+
+# === Node ===
+node_modules/
+.dist/
+dist/
+.cache/
+.turbo/
+*.tsbuildinfo
+# pnpm (not used — keeping entry in case switched back)
+pnpm-lock.yaml
+
+# === Editor ===
+.vscode/
+!.vscode/extensions.json
+.idea/
+*.swp
+*.swo
+*~
+
+# === OS ===
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# === Secrets ===
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+secrets/
+
+# === Data (large) ===
+data/raw/
+data/interim/
+data/processed/
+data/models/
+!data/samples/
+
+# === ML artifacts ===
+mlruns/
+mlartifacts/
+*.pkl
+*.joblib
+*.pt
+*.pth
+*.onnx
+*.safetensors
+
+# === Docker ===
+docker-compose.override.yml
+
+# === Logs ===
+*.log
+logs/
+
+# === Misc ===
+.hypothesis/
+*.prof
