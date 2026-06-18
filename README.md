@@ -10,10 +10,13 @@ PitchMind AI ingests football match video and produces tactical, statistical, an
 
 | Item | Value |
 | --- | --- |
-| Current phase | Phase 0 — Planning (awaiting approval) |
-| Version | 0.0.0 |
+| Current phase | Phase 5 complete — Video Upload Pipeline |
+| Version | 0.5.0-dev |
 | MVP target | Phases 1 – 13 (see `ROADMAP.md`) |
-| Code | Not started (planning gate) |
+| Backend | FastAPI + PostgreSQL + MinIO — auth, domain models, video upload live |
+| Frontend | React + Vite + Tailwind scaffold (placeholder; full UI in Phase 13) |
+| Tests | 47 passing (8 unit + 39 integration) |
+| CI | GitHub Actions — Python 3.11/3.12 matrix, PostgreSQL + Redis + MinIO |
 
 ---
 
@@ -57,31 +60,45 @@ PitchMind AI ingests football match video and produces tactical, statistical, an
 
 ---
 
-## Tech Stack (proposed — under review in `TECH_REVIEW.md`)
+## Tech Stack
 
-- **Frontend:** React + TypeScript + Tailwind CSS + Vite + TanStack Query + Recharts
-- **Backend:** FastAPI (Python 3.11+), Pydantic v2, SQLAlchemy 2.x, Alembic, Celery / RQ workers
-- **Database:** PostgreSQL 16, Redis (cache + queue), MinIO / S3 (object storage), pgvector (embeddings)
-- **CV:** YOLOv11 (Ultralytics), OpenCV, DeepSORT, ByteTrack (alternative)
-- **ML:** scikit-learn, XGBoost, LightGBM, SHAP, MLflow (experiment tracking)
-- **Agents:** LangGraph + LangChain core, Gemini / OpenAI as configurable LLM backend
-- **DevOps:** Docker, Docker Compose, GitHub Actions, Nginx, Prometheus + Grafana
+- **Frontend:** React 18 + TypeScript + Tailwind CSS + Vite + shadcn/ui (TanStack Query + Router in Phase 13)
+- **Backend:** FastAPI (Python 3.11+), Pydantic v2, SQLAlchemy 2.x async, Alembic, Dramatiq workers
+- **Database:** PostgreSQL 17, Redis 7 (cache + queue), MinIO (object storage), pgvector (embeddings — Phase 8)
+- **CV:** YOLOv11 (Ultralytics), OpenCV, DeepSORT + ByteTrack (Phase 6–7)
+- **ML:** scikit-learn, XGBoost, LightGBM, SHAP, MLflow (Phase 9–11)
+- **Agents:** LangGraph + LangChain core, Gemini / Claude / OpenAI / Ollama adapter (Phase 12)
+- **DevOps:** Docker Compose, GitHub Actions CI (Python 3.11/3.12 matrix), Prometheus + Grafana
 - **Version control:** Git + GitHub
 
 ---
 
 ## Hard Rules (See `GIT_STRATEGY.md`)
 
-- **No code is written until planning is approved.**
 - **No git operations are executed by the assistant.** Commands are suggested and require explicit approval.
-- All commits use the git identity recorded in `PROJECT_PROGRESS.md`.
+- All commits use the git identity recorded in `PROJECT_PROGRESS.md` (`Pranshu0722` / `pranshu.0422@gmail.com`).
 
 ---
 
-## Quickstart (placeholder — populated after Phase 1)
+## Quickstart (backend + infra)
 
 ```bash
-# To be added once Phase 1 (Project Setup) is complete.
+# 1. Start infrastructure (PostgreSQL, Redis, MinIO)
+docker compose up db cache minio -d
+
+# 2. Apply database migrations
+cd backend
+uv run alembic upgrade head
+
+# 3. Start the API server
+uv run uvicorn pitchmind.main:app --reload
+
+# 4. Open API docs
+#    Swagger UI  → http://localhost:8000/docs
+#    MinIO console → http://localhost:9001  (minioadmin / minioadmin)
+
+# 5. Run tests
+uv run pytest -v
 ```
 
 ---
