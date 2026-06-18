@@ -82,7 +82,7 @@ jobs:
 
       - name: Install dependencies
         working-directory: backend
-        run: uv sync --all-extras --dev
+        run: uv sync --dev
 
       - name: Lint (ruff)
         working-directory: backend
@@ -164,7 +164,7 @@ jobs:
         working-directory: backend
         run: |
           uv tool install pip-audit
-          uv export --no-dev --format requirements-txt > /tmp/requirements.txt
+          uv export --no-dev --format requirements-txt | grep -v "^-e " > /tmp/requirements.txt
           uv tool run pip-audit --requirement /tmp/requirements.txt
 
       - name: Node dependency audit
