@@ -1,7 +1,7 @@
 # Project Evaluation — PitchMind AI
 
-**Version:** 0.1 (Planning)
-**Status:** Draft — awaiting approval
+**Version:** 0.2 (Active)
+**Status:** Approved — updated as implementation progresses
 
 ---
 

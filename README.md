@@ -20,84 +20,140 @@ PitchMind AI ingests football match video and produces tactical, statistical, an
 
 ---
 
-## Planning Documents
+## What's Live (Phases 1–5)
+
+The backend API is fully functional. Start the stack and open `http://localhost:8000/docs` to explore.
+
+### Auth (`/api/v1/auth/`)
+| Method | Endpoint | Description |
+| --- | --- | --- |
+| POST | `/auth/register` | Register user (email + password, argon2id) |
+| POST | `/auth/login` | Login → access + refresh JWT tokens |
+| POST | `/auth/refresh` | Rotate tokens using refresh token |
+| GET | `/auth/me` | Get current authenticated user |
+
+### Football Domain (`/api/v1/`)
+| Method | Endpoint | Description |
+| --- | --- | --- |
+| GET/POST | `/teams/` | List teams / create team (admin) |
+| GET | `/teams/{id}` | Get team by id |
+| GET/POST | `/players/` | List players (filter by team, position) / create (admin) |
+| GET | `/players/{id}` | Get player by id |
+| GET/POST | `/matches/` | List matches / create match |
+| GET/PATCH | `/matches/{id}` | Get or update match |
+| GET/POST | `/matches/{id}/events` | List or add match events |
+
+### Video Uploads (`/api/v1/videos/`)
+| Method | Endpoint | Description |
+| --- | --- | --- |
+| POST | `/videos/` | Upload video file (mp4/avi/quicktime/webm, max 2 GB) |
+| GET | `/videos/` | List uploads (filter by match, status) |
+| GET | `/videos/{id}` | Get upload record |
+| GET | `/videos/{id}/download` | Generate pre-signed download URL |
+| DELETE | `/videos/{id}` | Delete upload + storage object (admin only) |
+
+---
+
+## Documentation
 
 | Document | Purpose |
 | --- | --- |
 | [`PRD.md`](./PRD.md) | Product Requirements — vision, personas, user stories, success metrics |
 | [`SRS.md`](./SRS.md) | Software Requirements Specification — functional & non-functional requirements |
 | [`ARCHITECTURE.md`](./ARCHITECTURE.md) | System, data, API, agent, ML, CV, deployment, security, monitoring architecture |
-| [`TECH_REVIEW.md`](./TECH_REVIEW.md) | Technology review with alternatives, trade-offs, and recommendations |
-| [`FOLDER_STRUCTURE.md`](./FOLDER_STRUCTURE.md) | Monorepo layout |
-| [`ROADMAP.md`](./ROADMAP.md) | 15-phase development roadmap with acceptance criteria |
+| [`TECH_REVIEW.md`](./TECH_REVIEW.md) | Technology review — alternatives, trade-offs, ADR decisions |
+| [`FOLDER_STRUCTURE.md`](./FOLDER_STRUCTURE.md) | Monorepo layout — ✅ built vs 📋 planned |
+| [`ROADMAP.md`](./ROADMAP.md) | 15-phase development roadmap with acceptance criteria and phase status |
 | [`GIT_STRATEGY.md`](./GIT_STRATEGY.md) | Branch strategy, commit conventions, approval rules |
 | [`FEATURES.md`](./FEATURES.md) | Innovation backlog: extra features, AI/ML/CV ideas, startup angles |
 | [`EVALUATION.md`](./EVALUATION.md) | Project scoring, weaknesses, risks, recommended improvements |
-| [`PROJECT_PROGRESS.md`](./PROJECT_PROGRESS.md) | Live progress tracker, architecture decisions, git identity record |
+| [`PROJECT_PROGRESS.md`](./PROJECT_PROGRESS.md) | Live progress tracker, technical debt, architecture decisions |
 | [`TODO.md`](./TODO.md) | Open tasks by priority |
-| [`CHANGELOG.md`](./CHANGELOG.md) | Professional changelog |
+| [`CHANGELOG.md`](./CHANGELOG.md) | Full changelog per phase |
 
 ---
 
-## High-Level Capabilities (MVP)
+## Capabilities
 
-1. Match-video upload and validation
-2. YOLOv11 player + ball detection
-3. DeepSORT multi-object tracking
-4. Player heatmaps and movement maps
-5. Match statistics (possession, distance, sprints, passes proxy)
-6. Tactical analysis via LangGraph agent
-7. React analytics dashboard
-8. LangGraph orchestrator + first-class agents
+### Live (Phases 1–5)
+- User registration, login, JWT auth with role-based access control
+- Football domain: teams, players, matches, match events (full CRUD)
+- Match video upload to MinIO object storage with pre-signed download URLs
+- 47 tests (8 unit + 39 integration) — all passing
+- GitHub Actions CI: Python 3.11 + 3.12 matrix, PostgreSQL + Redis + MinIO
 
-## Post-MVP Capabilities
-
-9. Match-outcome prediction (XGBoost / LightGBM, SHAP explainability)
-10. Injury-risk prediction
-11. Scouting recommendation engine
-12. Full multi-agent collaboration (Vision, Tactical, Statistics, Prediction, Injury, Scout, Report, Orchestrator)
-13. Natural-language football assistant
+### Planned — MVP (Phases 6–13)
+- YOLOv11 player + ball detection (Phase 6)
+- DeepSORT + ByteTrack multi-object tracking (Phase 7)
+- Player heatmaps, possession proxy, sprint/distance metrics (Phase 8)
+- Match-outcome prediction — XGBoost / LightGBM + SHAP explainability (Phase 9)
+- Injury-risk prediction model (Phase 10)
+- Player scouting similarity search via pgvector (Phase 11)
+- LangGraph multi-agent system — orchestrator + 7 specialist agents (Phase 12)
+- React analytics dashboard — upload UX, heatmaps, agent chat, PDF reports (Phase 13)
 
 ---
 
 ## Tech Stack
 
-- **Frontend:** React 18 + TypeScript + Tailwind CSS + Vite + shadcn/ui (TanStack Query + Router in Phase 13)
-- **Backend:** FastAPI (Python 3.11+), Pydantic v2, SQLAlchemy 2.x async, Alembic, Dramatiq workers
-- **Database:** PostgreSQL 17, Redis 7 (cache + queue), MinIO (object storage), pgvector (embeddings — Phase 8)
-- **CV:** YOLOv11 (Ultralytics), OpenCV, DeepSORT + ByteTrack (Phase 6–7)
-- **ML:** scikit-learn, XGBoost, LightGBM, SHAP, MLflow (Phase 9–11)
-- **Agents:** LangGraph + LangChain core, Gemini / Claude / OpenAI / Ollama adapter (Phase 12)
-- **DevOps:** Docker Compose, GitHub Actions CI (Python 3.11/3.12 matrix), Prometheus + Grafana
-- **Version control:** Git + GitHub
+| Layer | Technology |
+| --- | --- |
+| **Frontend** | React 18, TypeScript, Vite, Tailwind CSS, shadcn/ui (TanStack Query + Router — Phase 13) |
+| **Backend** | FastAPI, Python 3.11+, Pydantic v2, SQLAlchemy 2.x async, Alembic |
+| **Workers** | Dramatiq + Redis (task queue for CV/ML jobs) |
+| **Database** | PostgreSQL 17, Redis 7, MinIO (object storage), pgvector (Phase 8) |
+| **CV** | YOLOv11 (Ultralytics), OpenCV, DeepSORT, ByteTrack (Phase 6–7) |
+| **ML** | scikit-learn, XGBoost, LightGBM, SHAP, MLflow (Phase 9–11) |
+| **Agents** | LangGraph + LangChain, Gemini Flash / Claude Sonnet / Ollama adapter (Phase 12) |
+| **DevOps** | Docker Compose, GitHub Actions CI, Prometheus + Grafana (Phase 14–15) |
 
 ---
 
 ## Hard Rules (See `GIT_STRATEGY.md`)
 
 - **No git operations are executed by the assistant.** Commands are suggested and require explicit approval.
-- All commits use the git identity recorded in `PROJECT_PROGRESS.md` (`Pranshu0722` / `pranshu.0422@gmail.com`).
+- All commits use the git identity in `PROJECT_PROGRESS.md`: `Pranshu0722` / `pranshu.0422@gmail.com`.
+- `Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>` is appended to commits where the assistant generated the bulk of the code.
 
 ---
 
-## Quickstart (backend + infra)
+## Prerequisites
+
+- [Docker Desktop](https://www.docker.com/products/docker-desktop/) — for PostgreSQL, Redis, MinIO
+- [uv](https://docs.astral.sh/uv/getting-started/installation/) — Python package manager
+- Python 3.11 or 3.12
 
 ```bash
-# 1. Start infrastructure (PostgreSQL, Redis, MinIO)
+# Install uv (if not already installed)
+curl -LsSf https://astral.sh/uv/install.sh | sh
+```
+
+## Quickstart
+
+```bash
+# Clone and enter repo
+git clone https://github.com/Pranshu0722/PitchMind-AI.git
+cd PitchMind-AI
+
+# 1. Start infrastructure (PostgreSQL 17, Redis 7, MinIO)
 docker compose up db cache minio -d
 
-# 2. Apply database migrations
+# 2. Install backend dependencies
 cd backend
+uv sync --dev
+
+# 3. Apply database migrations
 uv run alembic upgrade head
 
-# 3. Start the API server
+# 4. Start the API server
 uv run uvicorn pitchmind.main:app --reload
 
-# 4. Open API docs
-#    Swagger UI  → http://localhost:8000/docs
-#    MinIO console → http://localhost:9001  (minioadmin / minioadmin)
+# 5. Explore the API
+#    Swagger UI    → http://localhost:8000/docs
+#    ReDoc         → http://localhost:8000/redoc
+#    MinIO console → http://localhost:9001  (login: minioadmin / minioadmin)
 
-# 5. Run tests
+# 6. Run the full test suite
 uv run pytest -v
 ```
 
@@ -105,4 +161,4 @@ uv run pytest -v
 
 ## License
 
-TBD — to be selected during Phase 1.
+MIT — to be formally added in Phase 14 before public release.

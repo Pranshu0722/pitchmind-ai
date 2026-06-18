@@ -1,10 +1,11 @@
 # Technology Review — PitchMind AI
 
-**Version:** 0.1 (Planning)
-**Status:** Draft — awaiting approval
+**Version:** 0.2 (Active)
+**Status:** Approved — decisions confirmed and implemented through Phase 5
 
 > Format per technology: **Why it fits → Alternatives → Trade-offs → Recommendation.**
-> Items marked **CHANGE PROPOSED** suggest a substitution worth discussing before Phase 1.
+> Items marked **CHANGE PROPOSED** have been resolved — see ✅ DECISION below each.
+> Items marked **CONFIRMED** are in production use from the phase listed.
 
 ---
 
@@ -71,12 +72,13 @@
   - **Dramatiq** — modern, ergonomic, sane defaults.
 - **CHANGE PROPOSED:** Consider **Dramatiq** or **Arq** instead of Celery. Celery is heavy and old; both alternatives ship with better DX, better async support, and less arcane config. Decision tracked as ADR-0001.
 - **Recommendation:** **Dramatiq + Redis** as primary candidate; Celery as fallback if a library only supports it.
+- ✅ **DECISION (ADR-0001, 2026-06-15):** **Dramatiq + Redis** — confirmed. `dramatiq[redis]` in `pyproject.toml`. Worker wiring deferred to Phase 6 (Redis now available via Docker).
 
 ---
 
 ## 3. Database
 
-### 3.1 PostgreSQL 16
+### 3.1 PostgreSQL 17 (upgraded from originally proposed 16)
 
 - **Why it fits:** Relational integrity, JSONB for flexible payloads, pgvector for embeddings, full-text search.
 - **Alternatives:** MySQL, CockroachDB, MongoDB (rejected — relational data dominates).
@@ -88,6 +90,7 @@
 - **Alternatives:** Qdrant (dedicated, HNSW, filters), Weaviate, Milvus, Pinecone (hosted).
 - **Trade-offs:** pgvector keeps the stack simple; dedicated stores scale further.
 - **Recommendation:** **pgvector for v1**, design an abstraction so we can swap to Qdrant if recall / latency degrades.
+- ✅ **DECISION (ADR-0004, 2026-06-15):** **pgvector** confirmed. Extension deferred from standalone PostgreSQL 17 install; will be enabled via `pgvector/pgvector:pg17` Docker image in Phase 8.
 
 ### 3.3 Cache & Queue Broker
 
@@ -120,6 +123,7 @@
 - **Alternatives:** Anthropic Claude (often strongest reasoning + tool use), Mistral Large, OSS local (Llama 3.x / Qwen via Ollama or vLLM).
 - **Trade-offs:** Cost, latency, tool-use reliability, region availability.
 - **CHANGE PROPOSED:** Architect as a provider-agnostic adapter (one interface, multiple backends). Default to **Gemini Flash 2.x for routing / cheap calls** and **Claude Sonnet or GPT-4o for synthesis / report generation**. Ship a local fallback via Ollama for demos without an API key.
+- ✅ **DECISION (ADR-0002, 2026-06-15):** Provider-agnostic adapter confirmed. Gemini Flash 2.x (routing) + Claude Sonnet / GPT-4o (synthesis) + Ollama (local fallback). Implementation deferred to Phase 12.
 
 ### 4.3 Embeddings
 
@@ -181,6 +185,7 @@
 - **Why it fits:** Mature MOT with appearance features.
 - **Alternatives:** **ByteTrack** (often beats DeepSORT on crowded scenes, simpler), **StrongSORT** (DeepSORT++), **OC-SORT**, **BoT-SORT**.
 - **CHANGE PROPOSED:** Implement a `Tracker` interface and **bench ByteTrack vs DeepSORT** on validation clips. Ship the winner. Don't pre-commit to DeepSORT.
+- ✅ **DECISION (ADR-0003, 2026-06-15):** `Tracker` interface confirmed. Both DeepSORT and ByteTrack will be implemented in Phase 7; winner selected by HOTA metric on validation clips.
 
 ### 6.4 Re-ID / Jersey OCR
 
@@ -208,6 +213,7 @@
 
 - **Proposed addition:** Nginx or **Caddy** (Caddy gives automatic HTTPS).
 - **Recommendation:** **Caddy in prod** for free Let's Encrypt; Nginx in dev compose.
+- ✅ **DECISION (ADR-0005, 2026-06-15):** Caddy in prod / Nginx in dev confirmed. Implementation deferred to Phase 15.
 
 ### 7.4 Observability Stack
 

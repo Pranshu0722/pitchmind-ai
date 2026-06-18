@@ -1,8 +1,8 @@
 # Software Requirements Specification — PitchMind AI
 
-**Version:** 0.1 (Planning)
+**Version:** 0.2 (Active)
 **Standard:** IEEE 830-inspired (lightweight)
-**Status:** Draft — awaiting approval
+**Status:** Approved — implementation in progress
 
 ---
 

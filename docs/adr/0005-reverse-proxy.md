@@ -38,6 +38,6 @@ We need a reverse proxy for TLS termination, routing, and compression. Dev and p
 
 ## Follow-up
 
-- [ ] Write `infra/nginx/nginx.conf` for dev (Phase 1 — done).
+- [ ] Write `infra/nginx/nginx.conf` for dev compose (Phase 6 — Docker-based infra being built out).
 - [ ] Write `infra/caddy/Caddyfile` for prod (Phase 15).
-- [ ] Document Caddy env vars for domain + email in `.env.example`.
+- [ ] Document Caddy env vars for domain + email in `.env.example` (Phase 15).

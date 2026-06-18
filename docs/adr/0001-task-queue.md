@@ -42,6 +42,7 @@ Use **Dramatiq** as the task broker with **Redis** as the backend.
 
 ## Follow-up
 
-- [ ] Pin `dramatiq[redis]` in `backend/pyproject.toml` (Phase 2).
-- [ ] Add `dramatiq-dashboard` for job monitoring (Phase 2).
-- [ ] Define retry policy constants in `backend/src/pitchmind/queue/broker.py`.
+- [x] Pin `dramatiq[redis]` in `backend/pyproject.toml` ✅ Phase 1 — in `pyproject.toml` dependencies.
+- [ ] Add `dramatiq-dashboard` for job monitoring (Phase 6).
+- [ ] Define retry policy constants in `backend/src/pitchmind/queue/broker.py` (Phase 6).
+- [ ] Wire `broker.py` and `tasks.py` under `backend/src/pitchmind/queue/` (Phase 6 — Redis now available via Docker).

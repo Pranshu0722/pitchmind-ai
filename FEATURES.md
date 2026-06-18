@@ -1,7 +1,7 @@
 # Innovation & Features Backlog — PitchMind AI
 
-**Version:** 0.1 (Planning)
-**Status:** Draft — awaiting approval
+**Version:** 0.2 (Active)
+**Status:** Approved — backlog actively maintained
 
 This document proposes features **beyond** the MVP and post-MVP scope already in `PRD.md`. Each entry includes:
 

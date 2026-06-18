@@ -1,7 +1,7 @@
 # Git Strategy — PitchMind AI
 
-**Version:** 0.1 (Planning)
-**Status:** Draft — awaiting approval
+**Version:** 0.2 (Active)
+**Status:** Approved — in force from Phase 1
 
 This document is binding for both the human contributor and any AI assistant working in the repository.
 
@@ -181,7 +181,7 @@ After the commit:
 ## 8. Authorship Requirements
 
 - All commits use the **exact** git identity recorded in `PROJECT_PROGRESS.md`.
-- No `Co-Authored-By:` footers added without explicit user request.
+- `Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>` footer is appended to commits where the assistant generated the bulk of the code. This was agreed by the user from Phase 1.
 - No author override flags.
 - No `--no-verify`, no signature bypass, no hook skip, unless the user has explicitly asked for it in this session.
 
@@ -214,7 +214,7 @@ The assistant will refuse a force-push to `main`/`master` outright and warn the 
 
 ## 11. Hooks (Phase 1)
 
-- **pre-commit:** ruff, black, isort, mypy (BE); eslint, prettier, tsc (FE).
+- **pre-commit:** `ruff check` (lint) + `ruff format` (format, replaces black/isort) + `mypy` (BE); `eslint` + `prettier` + `tsc` (FE).
 - **commit-msg:** conventional-commit linter.
 - **pre-push:** unit tests on changed packages (best-effort, fast).
 

@@ -17,10 +17,12 @@
 
 ## Test Plan
 
-- [ ] Unit tests pass (`make test-unit`)
-- [ ] Integration tests pass (`make test-integration`)
-- [ ] Lint + typecheck clean (`make lint && make typecheck`)
-- [ ] Manual smoke test on local stack (`make dev`)
+- [ ] Unit tests pass (`cd backend && uv run pytest tests/unit -v`)
+- [ ] Integration tests pass (`cd backend && uv run pytest tests/integration -v`)
+- [ ] Lint clean (`cd backend && uv run ruff check src/ tests/`)
+- [ ] Type check clean (`cd backend && uv run mypy src/pitchmind`)
+- [ ] Frontend checks pass (`cd frontend && npm run lint && npm run typecheck`)
+- [ ] Manual smoke: infra up (`docker compose up db cache minio -d`), API starts, key flow tested
 - [ ] Edge cases considered:
 
 ## Screenshots / Recordings

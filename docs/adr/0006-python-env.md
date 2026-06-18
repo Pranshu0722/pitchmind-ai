@@ -40,6 +40,6 @@ Use **uv** (Astral) as the Python environment and package manager for the entire
 
 ## Follow-up
 
-- [ ] Add `uv` install step to CI (`astral-sh/setup-uv@v4`).
-- [ ] Add `uv` install to `infra/docker/api.Dockerfile`.
-- [ ] Document `uv` install in `CONTRIBUTING.md`.
+- [x] Add `uv` install step to CI (`astral-sh/setup-uv@v4`) ✅ Phase 1 — in `.github/workflows/ci.yml`.
+- [ ] Add `uv` install to `infra/docker/api.Dockerfile` (Phase 6 — Dockerfile not written yet).
+- [ ] Document `uv` install in `CONTRIBUTING.md` (Phase 14).

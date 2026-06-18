@@ -12,7 +12,7 @@ The scouting similarity engine and long-term agent memory require approximate ne
 
 ## Decision
 
-Use **pgvector** inside the existing PostgreSQL 16 instance. Abstract access behind a `VectorStore` protocol so migration to Qdrant is a one-service swap.
+Use **pgvector** inside the existing PostgreSQL 17 instance. Abstract access behind a `VectorStore` protocol so migration to Qdrant is a one-service swap.
 
 ## Alternatives Considered
 
@@ -39,7 +39,7 @@ Use **pgvector** inside the existing PostgreSQL 16 instance. Abstract access beh
 
 ## Follow-up
 
-- [ ] Enable `pgvector` extension in the first Alembic migration (Phase 4).
-- [ ] Create HNSW index on `player_embeddings.embedding` with `lists=100`.
-- [ ] Implement `VectorStore` protocol in `backend/src/pitchmind/db/repositories/`.
-- [ ] Document Qdrant migration path in `ops/runbooks/vector_store_migration.md`.
+- [ ] Enable `pgvector` extension in Alembic migration — deferred from Phase 4. Standalone PostgreSQL 17 does not ship with pgvector; the extension will be enabled in Phase 8 using the `pgvector/pgvector:pg17` Docker image.
+- [ ] Create HNSW index on `player_embeddings.embedding` with `lists=100` (Phase 8).
+- [ ] Implement `VectorStore` protocol in `backend/src/pitchmind/db/repositories/` (Phase 11).
+- [ ] Document Qdrant migration path in `ops/runbooks/vector_store_migration.md` (Phase 15).

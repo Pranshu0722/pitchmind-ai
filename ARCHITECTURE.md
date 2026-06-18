@@ -1,7 +1,7 @@
 # System Architecture — PitchMind AI
 
-**Version:** 0.1 (Planning)
-**Status:** Draft — awaiting approval
+**Version:** 0.2 (Active)
+**Status:** Approved — implementation in progress (Phases 1–5 complete)
 
 This document describes the system, data, API, agent, ML, CV, deployment, security, and monitoring architecture. Trade-offs and alternative choices are captured in `TECH_REVIEW.md`. Phase-by-phase build order is in `ROADMAP.md`.
 
@@ -42,9 +42,9 @@ This document describes the system, data, API, agent, ML, CV, deployment, securi
          │        │ enqueue                  │ read/write
          │        ▼                          ▼
          │   ┌──────────────┐         ┌──────────────────┐
-         │   │ Redis Queue  │◀────────┤  PostgreSQL 16   │
-         │   │  (Celery /   │  state  │  (+ pgvector)    │
-         │   │   RQ broker) │         └──────────────────┘
+         │   │ Redis Queue  │◀────────┤  PostgreSQL 17   │
+         │   │  (Dramatiq)  │  state  │  (+ pgvector)    │
+         │   │              │         └──────────────────┘
          │   └──────┬───────┘                    ▲
          │          │ dequeue                    │
          │          ▼                            │
@@ -90,8 +90,8 @@ This document describes the system, data, API, agent, ML, CV, deployment, securi
 | `agent-service` | Python | LangGraph orchestrator + agents + tool registry |
 | `model-server` | FastAPI | Serve trained ML models (outcome / injury / similarity) |
 | `mlflow` | MLflow | Experiment tracking + model registry |
-| `db` | PostgreSQL 16 | OLTP store + pgvector for embeddings |
-| `cache+queue` | Redis 7 | Cache + Celery/RQ broker + rate limiting |
+| `db` | PostgreSQL 17 | OLTP store + pgvector for embeddings |
+| `cache+queue` | Redis 7 | Cache + Dramatiq broker + rate limiting |
 | `object-store` | MinIO | Artifact store (S3-compatible) |
 | `gateway` | Nginx | TLS, routing, rate limit, gzip |
 
@@ -209,6 +209,13 @@ Indexes (initial): `runs(match_id, status)`, `track_positions(track_id, t_ms)`, 
 | POST | `/api/v1/predict/injury` | Injury prediction |
 | POST | `/api/v1/scout/search` | Player similarity search |
 | GET | `/healthz` / `/readyz` / `/metrics` | Ops endpoints |
+
+> **Implementation status (Phase 5):** Routes with ✅ are live. All others are planned.
+> - ✅ `POST /api/v1/auth/register` — `POST /api/v1/auth/login` — `POST /api/v1/auth/refresh` — `GET /api/v1/auth/me`
+> - ✅ `GET/POST /api/v1/teams/` — `GET /api/v1/teams/{id}`
+> - ✅ `GET/POST /api/v1/players/` — `GET /api/v1/players/{id}`
+> - ✅ `GET/POST /api/v1/matches/` — `GET/PATCH /api/v1/matches/{id}` — `GET/POST /api/v1/matches/{id}/events`
+> - ✅ `POST/GET /api/v1/videos/` — `GET /api/v1/videos/{id}` — `GET /api/v1/videos/{id}/download` — `DELETE /api/v1/videos/{id}`
 
 ### 5.3 Error Model
 

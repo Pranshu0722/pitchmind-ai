@@ -1,123 +1,147 @@
 # Folder Structure — PitchMind AI
 
-**Version:** 0.1 (Planning)
-**Status:** Proposed — awaiting approval
+**Version:** 0.2 (Active)
+**Status:** Partially implemented — Phases 1–5 complete. Legend: ✅ exists · 📋 planned
 
 A pragmatic monorepo: one repo, multiple deployables, shared tooling. No micro-package overhead, but cleanly separated concerns.
 
 ```
 PitchMind-AI/
-├── README.md
-├── PRD.md
-├── SRS.md
-├── ARCHITECTURE.md
-├── TECH_REVIEW.md
-├── ROADMAP.md
-├── FOLDER_STRUCTURE.md
-├── GIT_STRATEGY.md
-├── FEATURES.md
-├── EVALUATION.md
-├── PROJECT_PROGRESS.md
-├── TODO.md
-├── CHANGELOG.md
-├── LICENSE
-├── .gitignore
-├── .gitattributes
-├── .editorconfig
-├── .env.example
-├── docker-compose.yml
-├── docker-compose.override.yml          # local overrides (gitignored)
-├── Makefile                              # tasks: dev, test, lint, format, migrate, seed
+├── README.md                             ✅
+├── PRD.md                                ✅
+├── SRS.md                                ✅
+├── ARCHITECTURE.md                       ✅
+├── TECH_REVIEW.md                        ✅
+├── ROADMAP.md                            ✅
+├── FOLDER_STRUCTURE.md                   ✅
+├── GIT_STRATEGY.md                       ✅
+├── FEATURES.md                           ✅
+├── EVALUATION.md                         ✅
+├── PROJECT_PROGRESS.md                   ✅
+├── TODO.md                               ✅
+├── CHANGELOG.md                          ✅
+├── LICENSE                               📋
+├── .gitignore                            ✅
+├── .gitattributes                        ✅
+├── .editorconfig                         ✅
+├── .env.example                          ✅
+├── docker-compose.yml                    ✅  (PostgreSQL 17, Redis 7, MinIO)
+├── docker-compose.override.yml           📋 local overrides (gitignored)
+├── Makefile                              📋 tasks: dev, test, lint, format, migrate, seed
 ├── .github/
 │   ├── workflows/
-│   │   ├── ci.yml
-│   │   ├── docker.yml
-│   │   └── release.yml
-│   ├── ISSUE_TEMPLATE/
-│   └── PULL_REQUEST_TEMPLATE.md
+│   │   ├── ci.yml                        ✅  (backend Python 3.11/3.12 + frontend Node 20 + security)
+│   │   ├── docker.yml                    📋
+│   │   └── release.yml                   📋
+│   ├── ISSUE_TEMPLATE/                   📋
+│   └── PULL_REQUEST_TEMPLATE.md          ✅
 ├── docs/
-│   ├── adr/                              # Architectural Decision Records
-│   │   ├── 0000-template.md
-│   │   ├── 0001-task-queue.md
-│   │   └── ...
-│   ├── api/                              # exported OpenAPI, postman
-│   ├── diagrams/                         # mermaid, draw.io, png
-│   └── models/                           # model cards (outcome, injury, scout)
+│   ├── adr/                              ✅
+│   │   ├── 0000-template.md              ✅
+│   │   ├── 0001-task-queue.md            ✅  (Dramatiq + Redis — resolved)
+│   │   ├── 0002-llm-provider.md          ✅  (multi-provider adapter — resolved)
+│   │   ├── 0003-tracker.md               ✅  (Tracker interface — resolved)
+│   │   ├── 0004-vector-store.md          ✅  (pgvector — resolved)
+│   │   ├── 0005-reverse-proxy.md         ✅  (Caddy prod / Nginx dev — resolved)
+│   │   └── 0006-python-env.md            ✅  (uv — resolved)
+│   ├── api/                              📋 exported OpenAPI, Postman collection
+│   ├── diagrams/                         📋 mermaid, draw.io, png
+│   └── models/                           📋 model cards (outcome, injury, scout)
 │
 ├── infra/
 │   ├── docker/
-│   │   ├── api.Dockerfile
-│   │   ├── worker-cv.Dockerfile
-│   │   ├── worker-ml.Dockerfile
-│   │   ├── agent.Dockerfile
-│   │   ├── model-server.Dockerfile
-│   │   └── web.Dockerfile
-│   ├── nginx/
-│   │   └── nginx.conf
-│   ├── caddy/
-│   │   └── Caddyfile
-│   ├── grafana/
-│   │   ├── provisioning/
-│   │   └── dashboards/
-│   ├── prometheus/
-│   │   └── prometheus.yml
-│   └── k8s/                              # helm charts (post-MVP)
+│   │   ├── api.Dockerfile                📋
+│   │   ├── worker-cv.Dockerfile          📋
+│   │   ├── worker-ml.Dockerfile          📋
+│   │   ├── agent.Dockerfile              📋
+│   │   ├── model-server.Dockerfile       📋
+│   │   └── web.Dockerfile                📋
+│   ├── nginx/                            📋
+│   ├── caddy/                            📋
+│   ├── grafana/                          📋
+│   ├── prometheus/                       📋
+│   └── k8s/                              📋 helm charts (post-MVP)
 │
 ├── backend/
-│   ├── pyproject.toml
-│   ├── uv.lock                           # or poetry.lock
-│   ├── alembic.ini
+│   ├── pyproject.toml                    ✅
+│   ├── uv.lock                           ✅
+│   ├── alembic.ini                       ✅
 │   ├── alembic/
+│   │   ├── env.py                        ✅
 │   │   └── versions/
+│   │       ├── 0001_initial_users_audit.py  ✅
+│   │       ├── 0002_domain_models.py        ✅
+│   │       ├── 0003_video_uploads.py        ✅
+│   │       └── 0004_...                     📋 (pgvector, Phase 8)
 │   ├── tests/
+│   │   ├── conftest.py                   ✅
 │   │   ├── unit/
-│   │   ├── integration/
-│   │   └── conftest.py
+│   │   │   ├── test_security.py          ✅  (6 tests)
+│   │   │   └── test_health.py            ✅  (2 tests)
+│   │   └── integration/
+│   │       ├── conftest.py               ✅
+│   │       ├── test_auth.py              ✅  (14 tests)
+│   │       ├── test_domain.py            ✅  (15 tests)
+│   │       └── test_video_uploads.py     ✅  (10 tests)
 │   └── src/
 │       └── pitchmind/
-│           ├── __init__.py
-│           ├── main.py                   # FastAPI app entrypoint
-│           ├── config.py                 # pydantic-settings
-│           ├── logging.py
-│           ├── telemetry.py              # OTEL setup
+│           ├── __init__.py               ✅
+│           ├── main.py                   ✅  FastAPI app + middleware + routers
+│           ├── config.py                 ✅  pydantic-settings (all env vars)
+│           ├── logging.py                ✅  structlog config
+│           ├── middleware.py             ✅  TraceID middleware
+│           ├── telemetry.py              📋 OTEL setup (Phase 2 follow-up)
 │           ├── api/
-│           │   ├── v1/
-│           │   │   ├── routes/
-│           │   │   │   ├── auth.py
-│           │   │   │   ├── matches.py
-│           │   │   │   ├── runs.py
-│           │   │   │   ├── chat.py
-│           │   │   │   ├── predictions.py
-│           │   │   │   └── scout.py
-│           │   │   ├── deps.py
-│           │   │   └── schemas/
-│           │   └── errors.py
+│           │   ├── errors.py             ✅  global exception handlers
+│           │   └── v1/
+│           │       ├── __init__.py       ✅  router registration
+│           │       ├── routes/
+│           │       │   ├── auth.py       ✅  /register /login /refresh /me
+│           │       │   ├── teams.py      ✅  GET/POST /teams/
+│           │       │   ├── players.py    ✅  GET/POST /players/
+│           │       │   ├── matches.py    ✅  GET/POST/PATCH /matches/ + events
+│           │       │   ├── video_uploads.py ✅ GET/POST /videos/ + download/delete
+│           │       │   ├── runs.py       📋 (Phase 6)
+│           │       │   ├── chat.py       📋 (Phase 12)
+│           │       │   ├── predictions.py 📋 (Phase 9)
+│           │       │   └── scout.py      📋 (Phase 11)
+│           │       └── schemas/
+│           │           ├── auth.py       ✅
+│           │           ├── team.py       ✅
+│           │           ├── player.py     ✅
+│           │           ├── match.py      ✅
+│           │           ├── match_event.py ✅
+│           │           └── video_upload.py ✅
 │           ├── core/
-│           │   ├── security.py           # JWT, hashing
-│           │   ├── auth.py
-│           │   ├── permissions.py
-│           │   ├── rate_limit.py
-│           │   └── pagination.py
+│           │   ├── security.py           ✅  argon2id hashing + JWT tokens
+│           │   ├── deps.py               ✅  get_current_user, require_role
+│           │   ├── rate_limit.py         📋 slowapi (Phase 2 follow-up)
+│           │   └── pagination.py         📋
 │           ├── db/
-│           │   ├── base.py
-│           │   ├── session.py
+│           │   ├── base.py               ✅  Base + TimestampMixin
+│           │   ├── session.py            ✅  async engine + get_db
 │           │   ├── models/
-│           │   │   ├── user.py
-│           │   │   ├── match.py
-│           │   │   ├── run.py
-│           │   │   ├── track.py
-│           │   │   ├── stats.py
-│           │   │   ├── prediction.py
-│           │   │   ├── chat.py
-│           │   │   └── audit.py
-│           │   └── repositories/
+│           │   │   ├── __init__.py       ✅
+│           │   │   ├── user.py           ✅  User + UserRole
+│           │   │   ├── audit.py          ✅  AuditLog
+│           │   │   ├── team.py           ✅  Team
+│           │   │   ├── player.py         ✅  Player + PlayerPosition
+│           │   │   ├── match.py          ✅  Match + MatchStatus
+│           │   │   ├── match_event.py    ✅  MatchEvent + EventType
+│           │   │   ├── video_upload.py   ✅  VideoUpload + UploadStatus
+│           │   │   ├── run.py            📋 (Phase 6)
+│           │   │   ├── track.py          📋 (Phase 7)
+│           │   │   ├── stats.py          📋 (Phase 8)
+│           │   │   ├── prediction.py     📋 (Phase 9)
+│           │   │   └── chat.py           📋 (Phase 12)
+│           │   └── repositories/         📋
 │           ├── storage/
-│           │   ├── object_store.py       # S3/MinIO abstraction
-│           │   └── signed_urls.py
+│           │   ├── __init__.py           ✅
+│           │   └── client.py             ✅  async S3/MinIO: upload, presign, delete
 │           ├── queue/
-│           │   ├── broker.py             # Dramatiq/Celery adapter
-│           │   └── tasks.py
-│           ├── pipeline/                 # orchestration logic
+│           │   ├── broker.py             📋 Dramatiq broker setup
+│           │   └── tasks.py              📋 task definitions
+│           ├── pipeline/                 📋 (Phase 6)
 │           │   ├── states.py
 │           │   ├── stages/
 │           │   │   ├── probe.py
@@ -128,7 +152,7 @@ PitchMind-AI/
 │           │   │   ├── metrics.py
 │           │   │   └── report.py
 │           │   └── runner.py
-│           ├── cv/                       # imported by worker-cv
+│           ├── cv/                       📋 (Phase 6-7)
 │           │   ├── detectors/
 │           │   │   ├── base.py
 │           │   │   ├── yolov11.py
@@ -141,88 +165,54 @@ PitchMind-AI/
 │           │   ├── homography.py
 │           │   ├── heatmaps.py
 │           │   ├── metrics.py
-│           │   └── evaluation/           # HOTA, MOTA, mAP
-│           ├── ml/
+│           │   └── evaluation/
+│           ├── ml/                       📋 (Phase 9-11)
 │           │   ├── features/
-│           │   │   ├── match_features.py
-│           │   │   ├── workload_features.py
-│           │   │   └── player_features.py
 │           │   ├── models/
-│           │   │   ├── outcome.py
-│           │   │   ├── injury.py
-│           │   │   └── similarity.py
 │           │   ├── training/
-│           │   │   ├── train_outcome.py
-│           │   │   ├── train_injury.py
-│           │   │   └── build_embeddings.py
-│           │   ├── registry.py           # MLflow wrapper
-│           │   └── explain.py            # SHAP utilities
-│           ├── agents/
-│           │   ├── graph.py              # LangGraph definition
-│           │   ├── state.py              # AgentState pydantic
+│           │   ├── registry.py
+│           │   └── explain.py
+│           ├── agents/                   📋 (Phase 12)
+│           │   ├── graph.py
+│           │   ├── state.py
 │           │   ├── orchestrator.py
 │           │   ├── specialists/
-│           │   │   ├── vision.py
-│           │   │   ├── tactical.py
-│           │   │   ├── stats.py
-│           │   │   ├── prediction.py
-│           │   │   ├── injury.py
-│           │   │   ├── scout.py
-│           │   │   └── report.py
 │           │   ├── tools/
-│           │   │   ├── registry.py
-│           │   │   ├── heatmap_tool.py
-│           │   │   ├── stats_tool.py
-│           │   │   ├── predict_tool.py
-│           │   │   ├── scout_tool.py
-│           │   │   └── pdf_tool.py
 │           │   ├── llm/
-│           │   │   ├── base.py
-│           │   │   ├── gemini.py
-│           │   │   ├── openai.py
-│           │   │   ├── anthropic.py
-│           │   │   └── ollama.py
 │           │   └── guardrails.py
-│           └── workers/
+│           └── workers/                  📋 (Phase 6)
 │               ├── cv_worker.py
 │               └── ml_worker.py
 │
-├── model_server/
-│   ├── pyproject.toml
-│   └── src/
-│       └── model_server/
-│           ├── main.py                   # FastAPI app
-│           ├── registry_client.py        # MLflow
-│           └── routes.py
+├── model_server/                         📋 (Phase 9)
 │
 ├── frontend/
-│   ├── package.json
-│   ├── pnpm-lock.yaml                    # or package-lock.json
-│   ├── vite.config.ts
-│   ├── tsconfig.json
-│   ├── tailwind.config.ts
-│   ├── postcss.config.cjs
-│   ├── eslint.config.js
-│   ├── index.html
-│   ├── public/
-│   ├── tests/
-│   │   ├── unit/
-│   │   └── e2e/                          # playwright
+│   ├── package.json                      ✅
+│   ├── package-lock.json                 ✅
+│   ├── vite.config.ts                    ✅
+│   ├── tsconfig.json                     ✅
+│   ├── tailwind.config.ts                ✅
+│   ├── postcss.config.cjs                ✅
+│   ├── eslint.config.js                  ✅
+│   ├── index.html                        ✅
+│   ├── public/                           ✅
 │   └── src/
-│       ├── main.tsx
-│       ├── app.tsx
-│       ├── router.tsx
+│       ├── main.tsx                      ✅  React root — imports App
+│       ├── App.tsx                       ✅  placeholder shell
+│       ├── styles/
+│       │   └── globals.css               ✅  Tailwind base styles
+│       ├── router.tsx                    📋 TanStack Router (Phase 13)
 │       ├── lib/
-│       │   ├── api/                      # OpenAPI-generated client
-│       │   ├── auth/
-│       │   ├── utils/
-│       │   └── i18n/
+│       │   ├── api/                      📋 OpenAPI-generated client
+│       │   ├── auth/                     📋
+│       │   ├── utils/                    📋
+│       │   └── i18n/                     📋
 │       ├── components/
-│       │   ├── ui/                       # shadcn/ui primitives
-│       │   ├── charts/
-│       │   ├── pitch/                    # konva pitch viz
-│       │   └── layout/
-│       ├── features/
+│       │   ├── ui/                       📋 shadcn/ui primitives (Phase 13)
+│       │   ├── charts/                   📋
+│       │   ├── pitch/                    📋 konva pitch viz
+│       │   └── layout/                   📋
+│       ├── features/                     📋 all feature modules (Phase 13)
 │       │   ├── auth/
 │       │   ├── matches/
 │       │   ├── upload/
@@ -233,32 +223,22 @@ PitchMind-AI/
 │       │   ├── predictions/
 │       │   ├── scout/
 │       │   └── chat/
-│       ├── pages/
-│       └── styles/
+│       └── pages/                        📋
 │
-├── packages/                             # shared internal libs (optional)
-│   └── ts-types/                         # generated TS types mirroring Pydantic
+├── packages/                             📋 shared internal libs (optional)
 │
-├── scripts/
+├── scripts/                              📋
 │   ├── seed_demo_match.py
 │   ├── download_models.sh
 │   ├── eval_tracker.py
 │   ├── eval_outcome_model.py
 │   └── generate_openapi.py
 │
-├── data/                                 # gitignored — local datasets/models
-│   ├── raw/
-│   ├── interim/
-│   ├── processed/
-│   ├── models/
-│   └── samples/                          # tiny demo clips kept in repo
+├── data/                                 📋 gitignored — local datasets/models
 │
 └── ops/
-    ├── runbooks/
-    │   ├── pipeline_stuck.md
-    │   ├── llm_budget_exceeded.md
-    │   └── db_restore.md
-    └── playbooks/
+    ├── runbooks/                         📋
+    └── playbooks/                        📋
 ```
 
 ---

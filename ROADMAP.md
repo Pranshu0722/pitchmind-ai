@@ -1,7 +1,7 @@
 # Development Roadmap — PitchMind AI
 
-**Version:** 0.1 (Planning)
-**Status:** Draft — awaiting approval
+**Version:** 0.2 (Active Development)
+**Status:** In Progress — Phases 0, 1, 2, 4, 5 complete; Phase 3 partial
 
 15 phases. MVP = Phases 1 – 8 + 12 + 13 (delivers the "video in → tactical insight + chat" loop). Phases 9 – 11 are post-MVP capability expansion. Phases 14 – 15 close out testing and deployment.
 
@@ -9,15 +9,16 @@ For each phase: **Objectives · Deliverables · Dependencies · Acceptance Crite
 
 ---
 
-## Phase 0 — Planning (current)
+## Phase 0 — Planning ✅ Complete
 
 - **Objectives:** Approved PRD, SRS, architecture, tech review, roadmap, evaluation, features backlog.
 - **Deliverables:** Every doc in this repository.
 - **Acceptance:** User explicitly approves the planning bundle and the git identity is recorded.
+**Status:** ✅ Complete — 2026-06-15
 
 ---
 
-## Phase 1 — Project Setup
+## Phase 1 — Project Setup ✅ Complete
 
 **Objectives**
 - Reproducible local dev environment.
@@ -47,10 +48,11 @@ For each phase: **Objectives · Deliverables · Dependencies · Acceptance Crite
 **Testing**
 - Smoke test: services answer `/healthz`.
 - CI matrix on Python 3.11 / 3.12.
+**Status:** ✅ Complete — 2026-06-16. Docker Compose (PostgreSQL 17, Redis, MinIO), pyproject.toml + uv.lock, GitHub Actions CI (Python 3.11/3.12 matrix), frontend Vite+React scaffold, ADR stubs 0000-0006.
 
 ---
 
-## Phase 2 — Backend Foundation
+## Phase 2 — Backend Foundation ✅ Complete
 
 **Objectives**
 - FastAPI app with config, logging, telemetry, auth, error model.
@@ -79,10 +81,12 @@ For each phase: **Objectives · Deliverables · Dependencies · Acceptance Crite
 - Unit: token issuance, hashing, permissions.
 - Integration: full register → login → refresh → logout flow.
 - Security: argon2 params, expiry, refresh rotation.
+**Status:** ✅ Complete — 2026-06-16. auth routes live (`/register`, `/login`, `/refresh`, `/me`), argon2id + JWT, AuditLog, TraceID middleware, structlog, Alembic migration 0001. 20 tests (6 unit + 14 integration).
+Note: Rate limiting (slowapi) deferred — Redis wasn't available until Docker was set up.
 
 ---
 
-## Phase 3 — Frontend Foundation
+## Phase 3 — Frontend Foundation ⚡ Partial
 
 **Objectives**
 - React SPA shell with auth, routing, layout, theme.
@@ -109,10 +113,11 @@ For each phase: **Objectives · Deliverables · Dependencies · Acceptance Crite
 **Testing**
 - Unit: component snapshots, auth utilities.
 - E2E: sign up → sign in → land on dashboard.
+**Status:** ⚡ Partial — Vite + React 18 + TypeScript + Tailwind + shadcn/ui scaffold in place. TanStack Router, auth screens, app shell, and all feature components deferred to Phase 13 (Dashboard Integration). Frontend CI passes (ESLint, Prettier, tsc, vitest).
 
 ---
 
-## Phase 4 — Database Design & Migrations
+## Phase 4 — Database Design & Domain Models ✅ Complete
 
 **Objectives**
 - Authoritative schema for users, matches, runs, tracks, stats, predictions, chat, audit.
@@ -136,10 +141,12 @@ For each phase: **Objectives · Deliverables · Dependencies · Acceptance Crite
 **Testing**
 - Integration: round-trip each model.
 - Migration up/down test in CI.
+**Status:** ✅ Complete — 2026-06-17. ORM models: Team, Player (PlayerPosition enum), Match (MatchStatus enum), MatchEvent (EventType enum — 10 types). Alembic migration 0002 (4 tables + 3 enums). CRUD API routes for /teams, /players, /matches, /matches/{id}/events. 15 integration tests.
+Note: pgvector extension deferred — standalone PostgreSQL 17 lacks it; will be enabled via Docker pgvector image in Phase 8. Seed script deferred.
 
 ---
 
-## Phase 5 — Video Upload Pipeline
+## Phase 5 — Video Upload Pipeline ✅ Complete
 
 **Objectives**
 - Robust large-file upload with chunking, validation, virus scan.
@@ -165,6 +172,8 @@ For each phase: **Objectives · Deliverables · Dependencies · Acceptance Crite
 **Testing**
 - Integration: upload, resume, cancel; ffprobe parse; thumbnail generation.
 - Security: EICAR + crafted MIME.
+**Status:** ✅ Complete (simplified scope) — 2026-06-17/18. Async S3 storage client (aioboto3), VideoUpload ORM model + UploadStatus enum, Alembic migration 0003, REST API (POST/GET/GET-id/GET-download/DELETE /videos/). File validation: 2 GB max, MIME allowlist (mp4, avi, quicktime, webm). Admin-only delete via RBAC. 10 integration tests. MinIO runs in Docker.
+Deferred to follow-up: chunked/resumable upload, ffprobe metadata extraction, thumbnails, ClamAV virus scan, per-user quotas.
 
 ---
 
@@ -458,16 +467,16 @@ For each phase: **Objectives · Deliverables · Dependencies · Acceptance Crite
 
 ## Milestones & Releases
 
-| Tag | Phases Closed | Notes |
-| --- | --- | --- |
-| `v0.1.0` | 1 – 4 | Skeleton + DB |
-| `v0.2.0` | 5 – 7 | Upload + CV alpha |
-| `v0.3.0` | 8, 12, 13 (MVP path) | Insights alpha + agent + dashboard |
-| `v1.0.0` | 1 – 8, 12, 13, 14 | MVP launch |
-| `v1.1.0` | + 9 | Outcome prediction |
-| `v1.2.0` | + 10 | Injury prediction |
-| `v1.3.0` | + 11 | Scout engine |
-| `v1.4.0` | + 15 hardening | Production deploy |
+| Tag | Phases Closed | Status | Notes |
+| --- | --- | --- | --- |
+| `v0.1.0` | 1 – 5 | 🟡 In Progress | Backend core: auth + domain models + video upload |
+| `v0.2.0` | 6 – 8 | ⬜ Not started | CV + tracking + heatmaps |
+| `v0.3.0` | 3, 12, 13 (MVP path) | ⬜ Not started | Full frontend + agents + dashboard |
+| `v1.0.0` | 1 – 8, 12, 13, 14 | ⬜ Not started | MVP launch |
+| `v1.1.0` | + 9 | ⬜ Not started | Outcome prediction |
+| `v1.2.0` | + 10 | ⬜ Not started | Injury prediction |
+| `v1.3.0` | + 11 | ⬜ Not started | Scout engine |
+| `v1.4.0` | + 15 hardening | ⬜ Not started | Production deploy |
 
 ---
 

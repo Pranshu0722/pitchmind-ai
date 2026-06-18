@@ -1,8 +1,8 @@
 # Product Requirements Document — PitchMind AI
 
-**Version:** 0.1 (Planning)
+**Version:** 0.2 (Active)
 **Owner:** Product / Tech Lead
-**Status:** Draft — awaiting approval
+**Status:** Approved — implementation in progress
 
 ---
 
