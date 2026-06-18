@@ -5,8 +5,13 @@ import structlog
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from pitchmind.api.errors import app_error_handler, unhandled_exception_handler, AppError
+from pitchmind.api.v1 import router as v1_router
 from pitchmind.config import settings
+from pitchmind.logging import configure_logging
+from pitchmind.middleware import TraceMiddleware
 
+configure_logging()
 log = structlog.get_logger(__name__)
 
 
@@ -27,6 +32,7 @@ def create_app() -> FastAPI:
         lifespan=lifespan,
     )
 
+    app.add_middleware(TraceMiddleware)
     app.add_middleware(
         CORSMiddleware,
         allow_origins=settings.api_cors_origins,
@@ -35,19 +41,18 @@ def create_app() -> FastAPI:
         allow_headers=["*"],
     )
 
-    # Health probes
+    app.add_exception_handler(AppError, app_error_handler)
+    app.add_exception_handler(Exception, unhandled_exception_handler)
+
     @app.get("/healthz", tags=["ops"], include_in_schema=False)
     async def healthz() -> dict[str, str]:
         return {"status": "ok"}
 
     @app.get("/readyz", tags=["ops"], include_in_schema=False)
     async def readyz() -> dict[str, str]:
-        # TODO Phase 2: check DB + Redis connectivity
         return {"status": "ok"}
 
-    # API routers — registered in Phase 2+
-    # from pitchmind.api.v1 import router as v1_router
-    # app.include_router(v1_router, prefix="/api/v1")
+    app.include_router(v1_router, prefix="/api/v1")
 
     return app
 

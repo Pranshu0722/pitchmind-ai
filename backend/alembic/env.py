@@ -1,16 +1,16 @@
-from logging.config import fileConfig
-from sqlalchemy import engine_from_config, pool
-from alembic import context
 import asyncio
-from sqlalchemy.ext.asyncio import AsyncEngine
+from logging.config import fileConfig
+
+from alembic import context
+from sqlalchemy import pool
+from sqlalchemy.ext.asyncio import create_async_engine
 
 config = context.config
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
-# Import all models so Alembic can autogenerate migrations
 from pitchmind.db.base import Base  # noqa: E402, F401
-import pitchmind.db.models  # noqa: E402, F401 — registers all ORM models
+import pitchmind.db.models  # noqa: E402, F401
 
 target_metadata = Base.metadata
 
@@ -36,18 +36,7 @@ def do_run_migrations(connection):  # type: ignore[no-untyped-def]
 async def run_async_migrations() -> None:
     from pitchmind.config import settings
 
-    configuration = config.get_section(config.config_ini_section) or {}
-    configuration["sqlalchemy.url"] = settings.database_url.replace(
-        "postgresql+asyncpg", "postgresql"
-    )
-    connectable = AsyncEngine(
-        engine_from_config(
-            configuration,
-            prefix="sqlalchemy.",
-            poolclass=pool.NullPool,
-            future=True,
-        )
-    )
+    connectable = create_async_engine(settings.database_url, poolclass=pool.NullPool)
     async with connectable.connect() as connection:
         await connection.run_sync(do_run_migrations)
     await connectable.dispose()
