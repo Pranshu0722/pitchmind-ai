@@ -16,7 +16,7 @@ from pitchmind.db.base import Base
 from pitchmind.db.session import get_db
 from pitchmind.main import app
 
-TEST_DATABASE_URL = "postgresql+asyncpg://pitchmind:pitchmind_dev_pw@localhost:5432/pitchmind_test"
+TEST_DATABASE_URL = os.environ["DATABASE_URL"]
 
 
 @pytest.fixture(scope="session")
