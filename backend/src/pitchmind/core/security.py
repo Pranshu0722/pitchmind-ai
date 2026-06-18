@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import uuid
 from datetime import UTC, datetime, timedelta
-from typing import Any
+from typing import Any, cast
 
 from argon2 import PasswordHasher
 from argon2.exceptions import VerifyMismatchError
@@ -37,8 +37,11 @@ def _make_token(
     }
     if extra:
         payload.update(extra)
-    return jwt.encode(
-        payload, settings.jwt_secret_key.get_secret_value(), algorithm=settings.jwt_algorithm
+    return cast(
+        "str",
+        jwt.encode(
+            payload, settings.jwt_secret_key.get_secret_value(), algorithm=settings.jwt_algorithm
+        ),
     )
 
 
@@ -61,6 +64,9 @@ def create_refresh_token(user_id: str) -> str:
 
 def decode_token(token: str) -> dict[str, Any]:
     """Decode and validate a JWT. Raises JWTError on any failure."""
-    return jwt.decode(
-        token, settings.jwt_secret_key.get_secret_value(), algorithms=[settings.jwt_algorithm]
+    return cast(
+        "dict[str, Any]",
+        jwt.decode(
+            token, settings.jwt_secret_key.get_secret_value(), algorithms=[settings.jwt_algorithm]
+        ),
     )

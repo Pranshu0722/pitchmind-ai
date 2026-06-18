@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from typing import Any
+
 import aioboto3
 import structlog
 from botocore.exceptions import ClientError
@@ -11,7 +13,7 @@ log = structlog.get_logger(__name__)
 _session = aioboto3.Session()
 
 
-def _client_kwargs() -> dict:
+def _client_kwargs() -> dict[str, Any]:
     return {
         "endpoint_url": settings.s3_endpoint_url,
         "aws_access_key_id": settings.s3_access_key,
@@ -48,7 +50,7 @@ async def get_presigned_url(key: str, expires: int = 3600) -> str:
             Params={"Bucket": settings.s3_bucket_name, "Key": key},
             ExpiresIn=expires,
         )
-    return url
+    return str(url)
 
 
 async def delete_file(key: str) -> None:

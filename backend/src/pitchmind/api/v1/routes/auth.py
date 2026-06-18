@@ -1,5 +1,6 @@
 import uuid
 from datetime import UTC, datetime
+from typing import Any
 
 import structlog
 from fastapi import APIRouter, Depends, HTTPException, Request, status
@@ -38,7 +39,7 @@ def _client_ip(request: Request) -> str:
 
 
 async def _audit(
-    db: AsyncSession, actor_id: uuid.UUID | None, action: str, ip: str, **meta
+    db: AsyncSession, actor_id: uuid.UUID | None, action: str, ip: str, **meta: Any
 ) -> None:
     entry = AuditLog(
         id=uuid.uuid4(),

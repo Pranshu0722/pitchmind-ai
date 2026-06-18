@@ -1,4 +1,4 @@
-from pydantic import Field, SecretStr
+from pydantic import SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -12,7 +12,7 @@ class Settings(BaseSettings):
 
     # App
     app_env: str = "local"
-    app_secret_key: SecretStr = Field(default="change-me-32-chars-min!!!!!!!!")
+    app_secret_key: SecretStr = SecretStr("change-me-32-chars-min!!!!!!!!")
     app_debug: bool = False
     app_log_level: str = "INFO"
 
@@ -30,12 +30,12 @@ class Settings(BaseSettings):
     # Object Storage
     s3_endpoint_url: str = "http://localhost:9000"
     s3_access_key: str = "minioadmin"
-    s3_secret_key: SecretStr = Field(default="minioadmin")
+    s3_secret_key: SecretStr = SecretStr("minioadmin")
     s3_bucket_name: str = "pitchmind"
     s3_region: str = "us-east-1"
 
     # Auth
-    jwt_secret_key: SecretStr = Field(default="change-me-jwt-secret")
+    jwt_secret_key: SecretStr = SecretStr("change-me-jwt-secret")
     jwt_algorithm: str = "HS256"
     jwt_access_token_expire_minutes: int = 15
     jwt_refresh_token_expire_days: int = 7
