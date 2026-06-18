@@ -65,7 +65,9 @@ async def test_login_wrong_password(client: AsyncClient):
 
 @pytest.mark.asyncio
 async def test_login_unknown_email(client: AsyncClient):
-    resp = await client.post(LOGIN_URL, json={"email": "nobody@example.com", "password": "Secret123"})
+    resp = await client.post(
+        LOGIN_URL, json={"email": "nobody@example.com", "password": "Secret123"}
+    )
     assert resp.status_code == 401
 
 

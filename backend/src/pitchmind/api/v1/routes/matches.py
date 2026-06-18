@@ -48,13 +48,19 @@ async def get_match(match_id: uuid.UUID, db: AsyncSession = Depends(get_db)) -> 
     return await _get_match_or_404(match_id, db)
 
 
-@router.post("/", response_model=MatchResponse, status_code=status.HTTP_201_CREATED,
-             dependencies=[Depends(require_role(UserRole.ADMIN))])
+@router.post(
+    "/",
+    response_model=MatchResponse,
+    status_code=status.HTTP_201_CREATED,
+    dependencies=[Depends(require_role(UserRole.ADMIN))],
+)
 async def create_match(body: MatchCreate, db: AsyncSession = Depends(get_db)) -> Match:
     for team_id in (body.home_team_id, body.away_team_id):
         result = await db.execute(select(Team).where(Team.id == team_id))
         if result.scalar_one_or_none() is None:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Team {team_id} not found")
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail=f"Team {team_id} not found"
+            )
 
     match = Match(id=uuid.uuid4(), **body.model_dump())
     db.add(match)
@@ -63,9 +69,14 @@ async def create_match(body: MatchCreate, db: AsyncSession = Depends(get_db)) ->
     return match
 
 
-@router.patch("/{match_id}", response_model=MatchResponse,
-              dependencies=[Depends(require_role(UserRole.ADMIN))])
-async def update_match(match_id: uuid.UUID, body: MatchUpdate, db: AsyncSession = Depends(get_db)) -> Match:
+@router.patch(
+    "/{match_id}",
+    response_model=MatchResponse,
+    dependencies=[Depends(require_role(UserRole.ADMIN))],
+)
+async def update_match(
+    match_id: uuid.UUID, body: MatchUpdate, db: AsyncSession = Depends(get_db)
+) -> Match:
     match = await _get_match_or_404(match_id, db)
     for field, value in body.model_dump(exclude_none=True).items():
         setattr(match, field, value)
@@ -83,8 +94,12 @@ async def list_events(match_id: uuid.UUID, db: AsyncSession = Depends(get_db)) -
     return list(result.scalars().all())
 
 
-@router.post("/{match_id}/events", response_model=MatchEventResponse, status_code=status.HTTP_201_CREATED,
-             dependencies=[Depends(require_role(UserRole.ADMIN))])
+@router.post(
+    "/{match_id}/events",
+    response_model=MatchEventResponse,
+    status_code=status.HTTP_201_CREATED,
+    dependencies=[Depends(require_role(UserRole.ADMIN))],
+)
 async def create_event(
     match_id: uuid.UUID, body: MatchEventCreate, db: AsyncSession = Depends(get_db)
 ) -> MatchEvent:

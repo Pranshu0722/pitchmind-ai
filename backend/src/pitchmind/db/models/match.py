@@ -27,7 +27,9 @@ class Match(Base, TimestampMixin):
     away_team_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), ForeignKey("teams.id", ondelete="RESTRICT"), nullable=False
     )
-    kickoff_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, index=True)
+    kickoff_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, index=True
+    )
     venue: Mapped[str | None] = mapped_column(String(200), nullable=True)
     status: Mapped[MatchStatus] = mapped_column(
         Enum(MatchStatus, name="match_status"), nullable=False, default=MatchStatus.SCHEDULED

@@ -1,11 +1,11 @@
+from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
-from typing import AsyncGenerator
 
 import structlog
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from pitchmind.api.errors import app_error_handler, unhandled_exception_handler, AppError
+from pitchmind.api.errors import AppError, app_error_handler, unhandled_exception_handler
 from pitchmind.api.v1 import router as v1_router
 from pitchmind.config import settings
 from pitchmind.logging import configure_logging

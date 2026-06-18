@@ -126,6 +126,7 @@ async def app_error_handler(request: Request, exc: AppError) -> JSONResponse:
 
 async def unhandled_exception_handler(request: Request, exc: Exception) -> JSONResponse:
     import structlog
+
     log = structlog.get_logger()
     log.error("unhandled_exception", exc_type=type(exc).__name__, path=request.url.path)
     return _make_error_response(

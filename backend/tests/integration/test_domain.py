@@ -1,6 +1,6 @@
 """Integration tests for teams, players, matches, and match events."""
+
 import uuid
-from datetime import UTC, datetime
 
 import pytest
 from httpx import AsyncClient
@@ -42,6 +42,7 @@ def _auth(token: str) -> dict:
 # Teams
 # ---------------------------------------------------------------------------
 
+
 @pytest.mark.asyncio
 async def test_list_teams_empty(client: AsyncClient):
     resp = await client.get("/api/v1/teams/")
@@ -72,6 +73,7 @@ async def test_get_team_not_found(client: AsyncClient):
 async def test_list_teams_public(client: AsyncClient, db):
     # Seed a team directly via DB (bypass admin guard for simplicity)
     from pitchmind.db.models.team import Team
+
     team = Team(id=uuid.uuid4(), name="Barcelona", country="Spain")
     db.add(team)
     await db.flush()
@@ -86,6 +88,7 @@ async def test_list_teams_public(client: AsyncClient, db):
 @pytest.mark.asyncio
 async def test_get_team_by_id(client: AsyncClient, db):
     from pitchmind.db.models.team import Team
+
     team_id = uuid.uuid4()
     team = Team(id=team_id, name="Real Madrid", country="Spain")
     db.add(team)
@@ -99,6 +102,7 @@ async def test_get_team_by_id(client: AsyncClient, db):
 # ---------------------------------------------------------------------------
 # Players
 # ---------------------------------------------------------------------------
+
 
 @pytest.mark.asyncio
 async def test_list_players_empty(client: AsyncClient):
@@ -124,6 +128,7 @@ async def test_get_player_not_found(client: AsyncClient):
 @pytest.mark.asyncio
 async def test_list_players_filter_by_position(client: AsyncClient, db):
     from pitchmind.db.models.player import Player, PlayerPosition
+
     db.add(Player(id=uuid.uuid4(), name="Keeper One", position=PlayerPosition.GK))
     db.add(Player(id=uuid.uuid4(), name="Forward One", position=PlayerPosition.FWD))
     await db.flush()
@@ -138,6 +143,7 @@ async def test_list_players_filter_by_position(client: AsyncClient, db):
 # ---------------------------------------------------------------------------
 # Matches
 # ---------------------------------------------------------------------------
+
 
 @pytest.mark.asyncio
 async def test_list_matches_empty(client: AsyncClient):
@@ -166,15 +172,18 @@ async def test_get_match_not_found(client: AsyncClient):
 
 @pytest.mark.asyncio
 async def test_match_same_team_validation(client: AsyncClient, db):
+    from pitchmind.core.security import create_access_token, hash_password
     from pitchmind.db.models.team import Team
     from pitchmind.db.models.user import User, UserRole
-    from pitchmind.core.security import hash_password, create_access_token
 
     team_id = uuid.uuid4()
     db.add(Team(id=team_id, name="Juventus", country="Italy"))
     admin = User(
-        id=uuid.uuid4(), email="admin2@test.com",
-        password_hash=hash_password("AdminPass1"), role=UserRole.ADMIN, is_active=True,
+        id=uuid.uuid4(),
+        email="admin2@test.com",
+        password_hash=hash_password("AdminPass1"),
+        role=UserRole.ADMIN,
+        is_active=True,
     )
     db.add(admin)
     await db.flush()
@@ -192,16 +201,19 @@ async def test_match_same_team_validation(client: AsyncClient, db):
 @pytest.mark.asyncio
 async def test_full_match_flow(client: AsyncClient, db):
     """Seed two teams + admin user, create match, update score, add event, list events."""
+    from pitchmind.core.security import create_access_token, hash_password
     from pitchmind.db.models.team import Team
     from pitchmind.db.models.user import User, UserRole
-    from pitchmind.core.security import hash_password, create_access_token
 
     home_id, away_id = uuid.uuid4(), uuid.uuid4()
     db.add(Team(id=home_id, name="Inter Milan", country="Italy"))
     db.add(Team(id=away_id, name="AC Milan", country="Italy"))
     admin = User(
-        id=uuid.uuid4(), email="admin3@test.com",
-        password_hash=hash_password("AdminPass1"), role=UserRole.ADMIN, is_active=True,
+        id=uuid.uuid4(),
+        email="admin3@test.com",
+        password_hash=hash_password("AdminPass1"),
+        role=UserRole.ADMIN,
+        is_active=True,
     )
     db.add(admin)
     await db.flush()
@@ -210,7 +222,11 @@ async def test_full_match_flow(client: AsyncClient, db):
     # Create match
     create_resp = await client.post(
         "/api/v1/matches/",
-        json={"home_team_id": str(home_id), "away_team_id": str(away_id), "kickoff_at": "2025-10-05T20:00:00Z"},
+        json={
+            "home_team_id": str(home_id),
+            "away_team_id": str(away_id),
+            "kickoff_at": "2025-10-05T20:00:00Z",
+        },
         headers=_auth(token),
     )
     assert create_resp.status_code == 201

@@ -42,8 +42,12 @@ async def get_player(player_id: uuid.UUID, db: AsyncSession = Depends(get_db)) -
     return player
 
 
-@router.post("/", response_model=PlayerResponse, status_code=status.HTTP_201_CREATED,
-             dependencies=[Depends(require_role(UserRole.ADMIN))])
+@router.post(
+    "/",
+    response_model=PlayerResponse,
+    status_code=status.HTTP_201_CREATED,
+    dependencies=[Depends(require_role(UserRole.ADMIN))],
+)
 async def create_player(body: PlayerCreate, db: AsyncSession = Depends(get_db)) -> Player:
     if body.team_id is not None:
         team = await db.execute(select(Team).where(Team.id == body.team_id))

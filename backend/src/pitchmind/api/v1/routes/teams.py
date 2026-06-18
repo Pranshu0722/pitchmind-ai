@@ -6,7 +6,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from pitchmind.api.v1.schemas.team import TeamCreate, TeamResponse
-from pitchmind.core.deps import get_current_user, require_role
+from pitchmind.core.deps import require_role
 from pitchmind.db.models.team import Team
 from pitchmind.db.models.user import UserRole
 from pitchmind.db.session import get_db
@@ -34,8 +34,12 @@ async def get_team(team_id: uuid.UUID, db: AsyncSession = Depends(get_db)) -> Te
     return team
 
 
-@router.post("/", response_model=TeamResponse, status_code=status.HTTP_201_CREATED,
-             dependencies=[Depends(require_role(UserRole.ADMIN))])
+@router.post(
+    "/",
+    response_model=TeamResponse,
+    status_code=status.HTTP_201_CREATED,
+    dependencies=[Depends(require_role(UserRole.ADMIN))],
+)
 async def create_team(body: TeamCreate, db: AsyncSession = Depends(get_db)) -> Team:
     existing = await db.execute(select(Team).where(Team.name == body.name))
     if existing.scalar_one_or_none() is not None:

@@ -37,7 +37,9 @@ def _client_ip(request: Request) -> str:
     return request.client.host if request.client else "unknown"
 
 
-async def _audit(db: AsyncSession, actor_id: uuid.UUID | None, action: str, ip: str, **meta) -> None:
+async def _audit(
+    db: AsyncSession, actor_id: uuid.UUID | None, action: str, ip: str, **meta
+) -> None:
     entry = AuditLog(
         id=uuid.uuid4(),
         actor_id=actor_id,
@@ -51,7 +53,9 @@ async def _audit(db: AsyncSession, actor_id: uuid.UUID | None, action: str, ip: 
 
 
 @router.post("/register", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
-async def register(body: RegisterRequest, request: Request, db: AsyncSession = Depends(get_db)) -> User:
+async def register(
+    body: RegisterRequest, request: Request, db: AsyncSession = Depends(get_db)
+) -> User:
     result = await db.execute(select(User).where(User.email == body.email))
     if result.scalar_one_or_none() is not None:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Email already registered")
@@ -71,7 +75,9 @@ async def register(body: RegisterRequest, request: Request, db: AsyncSession = D
 
 
 @router.post("/login", response_model=TokenResponse)
-async def login(body: LoginRequest, request: Request, db: AsyncSession = Depends(get_db)) -> TokenResponse:
+async def login(
+    body: LoginRequest, request: Request, db: AsyncSession = Depends(get_db)
+) -> TokenResponse:
     result = await db.execute(select(User).where(User.email == body.email))
     user = result.scalar_one_or_none()
 
@@ -96,8 +102,10 @@ async def login(body: LoginRequest, request: Request, db: AsyncSession = Depends
 async def refresh(body: RefreshRequest, db: AsyncSession = Depends(get_db)) -> TokenResponse:
     try:
         payload = decode_token(body.refresh_token)
-    except JWTError:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid or expired refresh token")
+    except JWTError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid or expired refresh token"
+        ) from exc
 
     if payload.get("type") != "refresh":
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token type")
@@ -105,7 +113,9 @@ async def refresh(body: RefreshRequest, db: AsyncSession = Depends(get_db)) -> T
     result = await db.execute(select(User).where(User.id == uuid.UUID(payload["sub"])))
     user = result.scalar_one_or_none()
     if user is None or not user.is_active:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User not found or inactive")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="User not found or inactive"
+        )
 
     return TokenResponse(
         access_token=create_access_token(str(user.id), user.role),

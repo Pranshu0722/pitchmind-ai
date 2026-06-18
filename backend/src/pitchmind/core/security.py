@@ -6,7 +6,7 @@ from typing import Any
 
 from argon2 import PasswordHasher
 from argon2.exceptions import VerifyMismatchError
-from jose import JWTError, jwt
+from jose import jwt
 
 from pitchmind.config import settings
 
@@ -24,7 +24,9 @@ def verify_password(plain: str, hashed: str) -> bool:
         return False
 
 
-def _make_token(subject: str, token_type: str, expires_delta: timedelta, extra: dict[str, Any] | None = None) -> str:
+def _make_token(
+    subject: str, token_type: str, expires_delta: timedelta, extra: dict[str, Any] | None = None
+) -> str:
     now = datetime.now(UTC)
     payload: dict[str, Any] = {
         "sub": subject,
@@ -35,7 +37,9 @@ def _make_token(subject: str, token_type: str, expires_delta: timedelta, extra: 
     }
     if extra:
         payload.update(extra)
-    return jwt.encode(payload, settings.jwt_secret_key.get_secret_value(), algorithm=settings.jwt_algorithm)
+    return jwt.encode(
+        payload, settings.jwt_secret_key.get_secret_value(), algorithm=settings.jwt_algorithm
+    )
 
 
 def create_access_token(user_id: str, role: str) -> str:
@@ -57,4 +61,6 @@ def create_refresh_token(user_id: str) -> str:
 
 def decode_token(token: str) -> dict[str, Any]:
     """Decode and validate a JWT. Raises JWTError on any failure."""
-    return jwt.decode(token, settings.jwt_secret_key.get_secret_value(), algorithms=[settings.jwt_algorithm])
+    return jwt.decode(
+        token, settings.jwt_secret_key.get_secret_value(), algorithms=[settings.jwt_algorithm]
+    )
