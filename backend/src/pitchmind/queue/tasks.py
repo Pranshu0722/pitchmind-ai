@@ -25,11 +25,12 @@ def _set_status(upload_id: str, upload_status: UploadStatus) -> None:
 
 @dramatiq.actor(queue_name="video")
 def process_video(upload_id: str) -> None:
+    from pitchmind.pipeline.runner import run_pipeline  # lazy — cv extras only in worker
+
     log.info("video.processing.start", upload_id=upload_id)
     _set_status(upload_id, UploadStatus.PROCESSING)
     try:
-        # Phase 8: YOLO inference and tracking will be inserted here
-        pass
+        run_pipeline(upload_id, _engine)
         _set_status(upload_id, UploadStatus.READY)
         log.info("video.processing.done", upload_id=upload_id)
     except Exception:

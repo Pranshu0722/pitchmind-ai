@@ -67,6 +67,7 @@ cv = [
   "ultralytics>=8.3.0",        # YOLOv11
   "numpy>=2.1.0",
   "pandas>=2.2.0",
+  "pyarrow>=18.0.0",
   "scipy>=1.14.0",
 ]
 
