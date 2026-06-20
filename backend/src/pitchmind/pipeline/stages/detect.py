@@ -9,7 +9,7 @@ if TYPE_CHECKING:
     import numpy as np
     import pandas as pd
 
-    from pitchmind.cv.detectors.base import Detection, Detector
+    from pitchmind.cv.detectors.base import Detector
 
 
 def detect(
