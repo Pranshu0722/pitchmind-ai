@@ -1,7 +1,7 @@
 # Project Progress — PitchMind AI
 
-**Last Updated:** 2026-06-18
-**Current Phase:** Phase 5 complete — CI hardening; Phase 6 (Computer Vision Engine) is next
+**Last Updated:** 2026-06-20
+**Current Phase:** Tech debt resolved (rate limiting + Dramatiq); Phase 6 (Computer Vision Engine) is next
 
 ---
 
@@ -100,16 +100,24 @@ All commits must use this exact identity. No changes without explicit re-confirm
 - [x] Fixed `uv sync --all-extras` → `uv sync --dev` (llvmlite can't build on Python 3.12)
 - [x] Fixed pip-audit: strip editable installs from requirements before auditing (prevents pip-audit following optional ml/cv extras → shap → llvmlite)
 - [x] Fixed frontend ESLint: moved `App` component from `main.tsx` to `App.tsx` (react-refresh/only-export-components rule)
-- [x] Total test suite: 8 unit + 39 integration = **47 tests** — all green locally
+- [x] Fixed pydantic-settings GHSA-4xgf-cpjx-pc3j vuln (bumped to >=2.14.2)
+- [x] Fixed vitest critical esbuild vuln chain (vitest 2 → 3.2.6)
+- [x] Fixed frontend unit test CI step (passWithNoTests: true; tests/unit/setup.ts)
+- [x] Fixed test_readyz 503 in unit tests (ASGITransport skips lifespan; mock app.state.redis in unit conftest)
+- [x] Fixed rate-limit test concurrent SQLAlchemy session error (asyncio.gather → sequential loop)
+- [x] Fixed test_upload_video_success assertion (READY → PENDING matches Phase 6 worker flow)
+- [x] Total test suite: 8 unit + 41 integration = **49 tests** — all green, CI passing
+
+### Tech Debt Resolved (2026-06-20)
+- [x] TD-4 Rate limiting — slowapi + Redis; `@limiter.limit()` on auth + upload endpoints; HTTP 429 + `RATE_LIMIT_EXCEEDED` error code
+- [x] TD-5 Dramatiq worker wiring — `process_video` actor; `RedisBroker` with retries; enqueued on every video upload; `worker.py` entry point
 
 ---
 
 ## Pending Tasks
 
-- [ ] Phase 6 — Computer Vision Engine (YOLOv11 + DeepSORT in `worker-cv`)
-- [ ] Rate limiting (slowapi) — Redis now available via Docker
-- [ ] Dramatiq task queue wiring (Redis available)
-- [ ] Phase 3 completion — auth screens, TanStack Router, dashboard shell (Phase 13)
+- [ ] Phase 6 — Computer Vision Engine (probe → sample → detect pipeline; YOLOv11; `detections.parquet`)
+- [ ] Phase 3 completion — auth screens, TanStack Router, dashboard shell (deferred to Phase 13)
 
 ---
 
@@ -144,8 +152,8 @@ All commits must use this exact identity. No changes without explicit re-confirm
 | TD-1 | pgvector extension deferred | Player embedding search unavailable | Standalone PG17 lacks extension; available in Docker pgvector image. Wire up in Phase 8. |
 | TD-2 | Frontend placeholder only | No auth screens / routing / UI | Full frontend deferred to Phase 13. |
 | TD-3 | Video upload reads entire file into memory | 2 GB uploads hold 2 GB RAM | Replace with streaming/multipart upload in Phase 5 follow-up. |
-| TD-4 | No rate limiting yet | Auth endpoints open to brute-force | slowapi + Redis available; add in next sprint. |
-| TD-5 | No Dramatiq worker wiring | Background tasks not yet dispatched | Worker service exists in compose; wiring deferred to Phase 6 prep. |
+| TD-4 | ~~No rate limiting yet~~ | ~~Auth endpoints open to brute-force~~ | ✅ Resolved 2026-06-20 — slowapi + Redis on auth + upload endpoints. |
+| TD-5 | ~~No Dramatiq worker wiring~~ | ~~Background tasks not yet dispatched~~ | ✅ Resolved 2026-06-20 — process_video actor enqueued on every upload. |
 
 ---
 

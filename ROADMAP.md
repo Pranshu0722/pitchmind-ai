@@ -1,7 +1,7 @@
 # Development Roadmap — PitchMind AI
 
 **Version:** 0.2 (Active Development)
-**Status:** In Progress — Phases 0, 1, 2, 4, 5 complete; Phase 3 partial
+**Status:** In Progress — Phases 0, 1, 2, 4, 5 complete; Phase 3 partial; Phase 6 starting
 
 15 phases. MVP = Phases 1 – 8 + 12 + 13 (delivers the "video in → tactical insight + chat" loop). Phases 9 – 11 are post-MVP capability expansion. Phases 14 – 15 close out testing and deployment.
 
@@ -82,7 +82,7 @@ For each phase: **Objectives · Deliverables · Dependencies · Acceptance Crite
 - Integration: full register → login → refresh → logout flow.
 - Security: argon2 params, expiry, refresh rotation.
 **Status:** ✅ Complete — 2026-06-16. auth routes live (`/register`, `/login`, `/refresh`, `/me`), argon2id + JWT, AuditLog, TraceID middleware, structlog, Alembic migration 0001. 20 tests (6 unit + 14 integration).
-Note: Rate limiting (slowapi) deferred — Redis wasn't available until Docker was set up.
+Rate limiting (slowapi + Redis) completed 2026-06-20 as part of tech debt cleanup — `@limiter.limit()` on `/login`, `/register`, and `POST /videos/`; HTTP 429 with `RATE_LIMIT_EXCEEDED` code.
 
 ---
 
@@ -177,7 +177,7 @@ Deferred to follow-up: chunked/resumable upload, ffprobe metadata extraction, th
 
 ---
 
-## Phase 6 — Computer Vision Engine
+## Phase 6 — Computer Vision Engine ⚡ In Progress
 
 **Objectives**
 - YOLOv11 detection running in the CV worker on GPU (CPU fallback).
@@ -469,7 +469,7 @@ Deferred to follow-up: chunked/resumable upload, ffprobe metadata extraction, th
 
 | Tag | Phases Closed | Status | Notes |
 | --- | --- | --- | --- |
-| `v0.1.0` | 1 – 5 | 🟡 In Progress | Backend core: auth + domain models + video upload |
+| `v0.1.0` | 1 – 5 + tech debt | 🟡 In Progress | Backend core: auth + domain models + video upload + rate limiting + Dramatiq |
 | `v0.2.0` | 6 – 8 | ⬜ Not started | CV + tracking + heatmaps |
 | `v0.3.0` | 3, 12, 13 (MVP path) | ⬜ Not started | Full frontend + agents + dashboard |
 | `v1.0.0` | 1 – 8, 12, 13, 14 | ⬜ Not started | MVP launch |

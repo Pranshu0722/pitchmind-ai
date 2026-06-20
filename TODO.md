@@ -1,27 +1,25 @@
 # TODO — PitchMind AI
 
-**Last Updated:** 2026-06-19
+**Last Updated:** 2026-06-20
 
 ---
 
-## 🔴 High Priority (current sprint)
+## 🔴 High Priority (current sprint — Phase 6: Computer Vision Engine)
 
-- [ ] **Commit + push CI fixes** — ESLint (App.tsx split), pip-audit editable-strip fix
-- [ ] **Add rate limiting** — slowapi + Redis (Redis available via Docker; was blocked until Docker worked)
-- [ ] **Wire Dramatiq workers** — Redis available; task dispatch not yet connected to API
-- [ ] **Streaming video upload** — current upload reads entire file into memory (TD-3); replace before Phase 6
-- [ ] **Choose licence** — MIT / Apache 2.0 (decide before public repo)
+- [ ] **Pin CUDA base image** — choose `nvidia/cuda:12.x-cudnn-runtime-ubuntu22.04` for `worker-cv`
+- [ ] **`ffprobe` probe stage** — extract duration / fps / resolution on upload before sampling
+- [ ] **Frame sampler** — configurable sampling rate (default 2 fps), write frames to temp dir
+- [ ] **YOLOv11 detection wrapper** — `ultralytics` YOLO, batch inference, CPU fallback
+- [ ] **Persist detections** — write `detections.parquet` artifact per upload
+- [ ] **Wire CV worker into Dramatiq** — replace `pass` stub in `process_video` with probe → sample → detect stages
+- [ ] **Streaming video upload** — current upload reads entire file into memory (TD-3); required before large-scale CV use
 
 ---
 
-## 🟡 Medium Priority (Phase 6 prep)
+## 🟡 Medium Priority (Phase 7 prep)
 
-- [ ] Pin CUDA base image version for `worker-cv.Dockerfile`
-- [ ] `ffprobe` metadata stage — extract duration/fps/resolution on upload
-- [ ] Frame sampler (configurable fps)
-- [ ] YOLOv11 detection wrapper + batch inference
 - [ ] `Tracker` interface + DeepSORT implementation
-- [ ] ByteTrack implementation (bench vs DeepSORT)
+- [ ] ByteTrack implementation (bench vs DeepSORT; pick winner via HOTA)
 - [ ] Team assignment (k-means on HSV jersey histogram)
 - [ ] Confirm LLM API keys available — Gemini and/or OpenAI for Phase 12
 
@@ -167,3 +165,13 @@ See `FEATURES.md` for the full innovation backlog:
 - [x] Fixed llvmlite build failure (uv sync --dev, no --all-extras)
 - [x] Fixed pip-audit editable-install traversal (strip -e lines before audit)
 - [x] Fixed ESLint react-refresh warning (App.tsx split)
+- [x] Fixed pydantic-settings GHSA-4xgf-cpjx-pc3j vuln (bumped to ≥2.14.2)
+- [x] Fixed vitest critical esbuild vuln chain (vitest 2 → 3.2.6)
+- [x] Fixed frontend unit test CI step (passWithNoTests: true)
+- [x] Fixed test_readyz 503 in unit tests (mock app.state.redis in unit conftest)
+- [x] Fixed rate-limit test concurrent SQLAlchemy session error (sequential loop)
+- [x] Fixed test_upload_video_success assertion (READY → PENDING)
+
+### Tech Debt Resolved
+- [x] TD-4 Rate limiting — slowapi + Redis on auth + upload endpoints
+- [x] TD-5 Dramatiq worker wiring — process_video actor enqueued on upload

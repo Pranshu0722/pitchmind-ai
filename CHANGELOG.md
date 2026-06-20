@@ -9,9 +9,29 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ## [Unreleased]
 
+### Added
+- `backend/src/pitchmind/api/limiter.py` — slowapi `Limiter` backed by Redis (`swallow_errors=True` so Redis outage never kills the API)
+- `backend/src/pitchmind/queue/__init__.py` — package marker
+- `backend/src/pitchmind/queue/broker.py` — Dramatiq `RedisBroker` with `Retries` middleware (3 retries, 1 s–60 s exponential backoff)
+- `backend/src/pitchmind/queue/tasks.py` — `process_video` Dramatiq actor (PENDING → PROCESSING → READY / FAILED); sync psycopg2 DB access via `create_engine`
+- `backend/worker.py` — Dramatiq worker entry point (`uv run dramatiq pitchmind.queue.tasks --queues video`)
+- `backend/tests/integration/test_rate_limit.py` — 2 integration tests: 429 returned after 70 sequential login requests; response body contains `RATE_LIMIT_EXCEEDED`
+- `backend/tests/unit/conftest.py` — unit-test client fixture with `app.state.redis = AsyncMock()` (ASGITransport does not run lifespan)
+
+### Changed
+- `backend/src/pitchmind/main.py` — Redis lifespan (ping on startup, `aclose` on shutdown); `app.state.limiter = limiter`; `RateLimitExceeded` → HTTP 429 with `RATE_LIMIT_EXCEEDED` error code; `/readyz` pings `app.state.redis`
+- `backend/src/pitchmind/api/v1/routes/auth.py` — `@limiter.limit(settings.rate_limit_default)` on `POST /login` and `POST /register`
+- `backend/src/pitchmind/api/v1/routes/video_uploads.py` — `@limiter.limit(settings.rate_limit_upload)` on `POST /`; initial status set to `PENDING`; `process_video.send()` enqueued after flush
+- `backend/pyproject.toml` — added `psycopg2-binary>=2.9.0` (sync DB driver for Dramatiq workers); bumped `pydantic-settings>=2.14.2` (GHSA-4xgf-cpjx-pc3j)
+- `frontend/package.json` — vitest + @vitest/ui `^2.1.0` → `^3.2.6` (resolves critical esbuild vuln chain)
+- `frontend/vite.config.ts` — added `passWithNoTests: true` to vitest config (CI does not fail when no frontend unit tests exist yet)
+
 ### Fixed
 - Frontend ESLint CI failure — moved `App` component from `main.tsx` into `src/App.tsx`; `react-refresh/only-export-components` rule now satisfied
 - GitHub Actions pip-audit failure — strip editable installs from `uv export` output before auditing; prevents pip-audit following optional `ml` extra (shap → llvmlite 0.36.0, Python <3.10 only)
+- Integration test `test_readyz` — `app.state.redis` not set when using `ASGITransport` (lifespan not run); fixed by mocking in unit conftest
+- Integration test `test_rate_limit_exceeded_returns_429` — `asyncio.gather()` concurrent requests share one `AsyncSession`; replaced with sequential loop
+- Integration test `test_upload_video_success` — expected `"READY"` but upload now sets `"PENDING"` and enqueues worker; assertion updated
 
 ---
 
