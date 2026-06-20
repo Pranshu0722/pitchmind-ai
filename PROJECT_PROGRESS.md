@@ -1,7 +1,7 @@
 # Project Progress — PitchMind AI
 
 **Last Updated:** 2026-06-20
-**Current Phase:** Tech debt resolved (rate limiting + Dramatiq); Phase 6 (Computer Vision Engine) is next
+**Current Phase:** Phase 6 complete (YOLOv11 detection pipeline); Phase 7 (Player Tracking) is next
 
 ---
 
@@ -28,8 +28,8 @@ All commits must use this exact identity. No changes without explicit re-confirm
 | 3 | Frontend Foundation | ⚡ Partial | 2026-06-16 | — |
 | 4 | Database Design & Domain Models | ✅ Complete | 2026-06-17 | 2026-06-17 |
 | 5 | Video Upload Pipeline | ✅ Complete | 2026-06-17 | 2026-06-18 |
-| 6 | Computer Vision Engine | ⚡ In Progress | 2026-06-20 | — |
-| 7 | Player Tracking | ⬜ Not Started | — | — |
+| 6 | Computer Vision Engine | ✅ Complete | 2026-06-20 | 2026-06-20 |
+| 7 | Player Tracking | ⚡ In Progress | 2026-06-20 | — |
 | 8 | Heatmaps & Analytics | ⬜ Not Started | — | — |
 | 9 | Match Outcome Prediction | ⬜ Not Started | — | — |
 | 10 | Injury Risk Prediction | ⬜ Not Started | — | — |
@@ -112,11 +112,24 @@ All commits must use this exact identity. No changes without explicit re-confirm
 - [x] TD-4 Rate limiting — slowapi + Redis; `@limiter.limit()` on auth + upload endpoints; HTTP 429 + `RATE_LIMIT_EXCEEDED` error code
 - [x] TD-5 Dramatiq worker wiring — `process_video` actor; `RedisBroker` with retries; enqueued on every video upload; `worker.py` entry point
 
+### Phase 6 — Computer Vision Engine (2026-06-20)
+- [x] `storage/sync_client.py` — sync boto3 download/upload for Dramatiq workers
+- [x] `cv/detectors/base.py` — `Detection` dataclass + `Detector` Protocol
+- [x] `cv/detectors/yolov11.py` — `YoloV11Detector` (lazy ultralytics import; CPU/GPU via `cv_device`)
+- [x] `pipeline/stages/probe.py` — OpenCV metadata extraction (fps, duration, width, height)
+- [x] `pipeline/stages/sample.py` — frame sampler at configurable fps; yields (idx, timestamp_s, frame)
+- [x] `pipeline/stages/detect.py` — batched YOLO inference → `pd.DataFrame`; partial-batch flush
+- [x] `pipeline/runner.py` — orchestrates probe → sample → detect; writes `detections.parquet` to S3; updates `VideoUpload.meta` + `duration_seconds`
+- [x] `queue/tasks.py` — `process_video` wired to `run_pipeline` (lazy import, cv extras only in worker)
+- [x] `worker-cv.Dockerfile` — fixed to `uv sync --extra cv`; CMD → `dramatiq pitchmind.queue.tasks`
+- [x] 8 unit tests — all cv2/pandas/ultralytics mocked via `patch.dict(sys.modules)`; CI-safe
+- [x] Total test suite: 8 unit + 41 integration = **49 tests** — all green
+
 ---
 
 ## Pending Tasks
 
-- [ ] Phase 6 — Computer Vision Engine (probe → sample → detect pipeline; YOLOv11; `detections.parquet`)
+- [ ] Phase 7 — Player Tracking (Tracker interface, DeepSORT, ByteTrack, team assignment)
 - [ ] Phase 3 completion — auth screens, TanStack Router, dashboard shell (deferred to Phase 13)
 
 ---

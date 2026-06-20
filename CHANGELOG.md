@@ -9,6 +9,26 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ## [Unreleased]
 
+### Added (Phase 6 — Computer Vision Engine)
+- `backend/src/pitchmind/storage/sync_client.py` — sync boto3 `download_file_sync` / `upload_file_sync` for Dramatiq workers (async client unusable in sync context)
+- `backend/src/pitchmind/cv/detectors/base.py` — `Detection` dataclass + `Detector` Protocol (mockable, no ultralytics dependency at import time)
+- `backend/src/pitchmind/cv/detectors/yolov11.py` — `YoloV11Detector`: lazy `ultralytics` import, batched `model.predict()`, boxes parsed to `Detection` objects
+- `backend/src/pitchmind/pipeline/stages/probe.py` — `probe(video_path)` → `ProbeResult` (fps, duration, width, height) via OpenCV lazy import
+- `backend/src/pitchmind/pipeline/stages/sample.py` — `sample_frames(video_path, target_fps)` → iterator of `(idx, timestamp_s, frame)` at configurable sampling rate
+- `backend/src/pitchmind/pipeline/stages/detect.py` — `detect(frames, detector, batch_size)` → `pd.DataFrame` of detections; handles partial-batch flush; empty-result guard
+- `backend/src/pitchmind/pipeline/runner.py` — `run_pipeline(upload_id, engine)`: download → probe → sample → detect → write `detections.parquet` → upload to S3 → update `VideoUpload.meta` + `duration_seconds`
+- `backend/tests/unit/test_cv_pipeline.py` — 8 unit tests; cv2 / pandas / ultralytics all mocked via `patch.dict(sys.modules)` so tests pass without cv extras
+- Package markers: `cv/__init__.py`, `cv/detectors/__init__.py`, `pipeline/__init__.py`, `pipeline/stages/__init__.py`
+
+### Changed (Phase 6)
+- `backend/src/pitchmind/queue/tasks.py` — `process_video` actor: replaced `pass` stub with lazy `run_pipeline(upload_id, _engine)` call
+- `backend/pyproject.toml` — added `pyarrow>=18.0.0` to `cv` extras (required for `df.to_parquet()`)
+- `infra/docker/worker-cv.Dockerfile` — `uv sync --frozen --no-dev` → `uv sync --extra cv --frozen --no-dev`; CMD changed from dead `pitchmind.workers.cv_worker` to `dramatiq pitchmind.queue.tasks --queues video --processes 1 --threads 2`
+
+---
+
+## [Unreleased — Tech Debt / CI Hardening]
+
 ### Added
 - `backend/src/pitchmind/api/limiter.py` — slowapi `Limiter` backed by Redis (`swallow_errors=True` so Redis outage never kills the API)
 - `backend/src/pitchmind/queue/__init__.py` — package marker

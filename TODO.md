@@ -4,28 +4,28 @@
 
 ---
 
-## 🔴 High Priority (current sprint — Phase 6: Computer Vision Engine)
+## 🔴 High Priority (current sprint — Phase 7: Player Tracking)
 
-- [ ] **Pin CUDA base image** — choose `nvidia/cuda:12.x-cudnn-runtime-ubuntu22.04` for `worker-cv`
-- [ ] **`ffprobe` probe stage** — extract duration / fps / resolution on upload before sampling
-- [ ] **Frame sampler** — configurable sampling rate (default 2 fps), write frames to temp dir
-- [ ] **YOLOv11 detection wrapper** — `ultralytics` YOLO, batch inference, CPU fallback
-- [ ] **Persist detections** — write `detections.parquet` artifact per upload
-- [ ] **Wire CV worker into Dramatiq** — replace `pass` stub in `process_video` with probe → sample → detect stages
+- [ ] **`Tracker` interface** — abstract base in `cv/trackers/base.py`
+- [ ] **DeepSORT implementation** — `cv/trackers/deepsort.py`
+- [ ] **ByteTrack implementation** — `cv/trackers/bytetrack.py` (bench vs DeepSORT via HOTA)
+- [ ] **Team assignment** — k-means on HSV jersey histogram; assign "home" / "away" / "referee" labels
+- [ ] **Persist tracks** — `Track` ORM model + Alembic migration; tracks stored per frame
 - [ ] **Streaming video upload** — current upload reads entire file into memory (TD-3); required before large-scale CV use
 
 ---
 
-## 🟡 Medium Priority (Phase 7 prep)
+## 🟡 Medium Priority (Phase 8 prep)
 
-- [ ] `Tracker` interface + DeepSORT implementation
-- [ ] ByteTrack implementation (bench vs DeepSORT; pick winner via HOTA)
-- [ ] Team assignment (k-means on HSV jersey histogram)
+- [ ] 4-point homography + pitch coordinate transform
+- [ ] Heatmap generator (per-player + per-team + per-period)
+- [ ] Match metrics (possession proxy, distance, sprints, formation)
+- [ ] HOTA / MOTA evaluation harness
 - [ ] Confirm LLM API keys available — Gemini and/or OpenAI for Phase 12
 
 ---
 
-## 🟢 Low Priority (post-Phase 6)
+## 🟢 Low Priority (post-Phase 7)
 
 ### CV Pipeline
 - [ ] 4-point homography + pitch coordinate transform
@@ -175,3 +175,16 @@ See `FEATURES.md` for the full innovation backlog:
 ### Tech Debt Resolved
 - [x] TD-4 Rate limiting — slowapi + Redis on auth + upload endpoints
 - [x] TD-5 Dramatiq worker wiring — process_video actor enqueued on upload
+
+### Phase 6 — Computer Vision Engine
+- [x] `pyarrow>=18.0.0` added to cv extras
+- [x] Sync S3 client (`storage/sync_client.py`) — `download_file_sync` / `upload_file_sync` for Dramatiq workers
+- [x] `Detection` dataclass + `Detector` Protocol (`cv/detectors/base.py`)
+- [x] `YoloV11Detector` (`cv/detectors/yolov11.py`) — lazy ultralytics import, CPU/GPU via `cv_device` setting
+- [x] `probe` stage — OpenCV metadata extraction (fps, duration, resolution)
+- [x] `sample_frames` stage — configurable fps sampling, yields (idx, timestamp, frame)
+- [x] `detect` stage — batched inference → `pd.DataFrame`; partial-batch flush; empty guard
+- [x] `run_pipeline` runner — download → probe → sample → detect → `detections.parquet` → S3 → update DB
+- [x] `process_video` actor wired to `run_pipeline` (lazy import — cv extras only in worker)
+- [x] `worker-cv.Dockerfile` fixed (`--extra cv` sync; correct dramatiq CMD)
+- [x] 8 unit tests — all cv2/pandas/ultralytics mocked; run without cv extras
