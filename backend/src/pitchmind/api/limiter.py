@@ -6,5 +6,5 @@ from pitchmind.config import settings
 limiter = Limiter(
     key_func=get_remote_address,
     storage_uri=settings.redis_url,
-    default_limits=[settings.rate_limit_default],
+    swallow_errors=True,
 )

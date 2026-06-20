@@ -7,7 +7,6 @@ from fastapi import FastAPI, HTTPException, Request, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from slowapi.errors import RateLimitExceeded
-from slowapi.middleware import SlowAPIMiddleware
 
 from pitchmind.api.errors import (
     AppError,
@@ -63,7 +62,6 @@ def create_app() -> FastAPI:
 
     app.state.limiter = limiter
     app.add_middleware(TraceMiddleware)
-    app.add_middleware(SlowAPIMiddleware)
     app.add_middleware(
         CORSMiddleware,
         allow_origins=settings.api_cors_origins,

@@ -18,7 +18,7 @@ dependencies = [
   "python-multipart>=0.0.12",
   # Config & validation
   "pydantic>=2.10.0",
-  "pydantic-settings>=2.7.0",
+  "pydantic-settings>=2.14.2",
   # Auth
   "python-jose[cryptography]>=3.3.0",
   "passlib[argon2]>=1.7.4",
