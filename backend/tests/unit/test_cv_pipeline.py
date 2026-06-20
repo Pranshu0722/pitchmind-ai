@@ -8,7 +8,6 @@ from __future__ import annotations
 
 import sys
 import uuid
-from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -38,7 +37,7 @@ def _make_cv2_mock(fps: float = 25.0, frames: int = 250, w: int = 1920, h: int =
 # ---------------------------------------------------------------------------
 
 
-def test_probe_returns_correct_metadata(tmp_path: Path) -> None:
+def test_probe_returns_correct_metadata(tmp_path) -> None:
     fake_video = tmp_path / "clip.mp4"
     fake_video.write_bytes(b"fake")
 
@@ -59,7 +58,7 @@ def test_probe_returns_correct_metadata(tmp_path: Path) -> None:
     mock_cv2.VideoCapture.return_value.release.assert_called_once()
 
 
-def test_probe_uses_fallback_fps_when_zero(tmp_path: Path) -> None:
+def test_probe_uses_fallback_fps_when_zero(tmp_path) -> None:
     fake_video = tmp_path / "clip.mp4"
     fake_video.write_bytes(b"fake")
 
@@ -81,7 +80,7 @@ def test_probe_uses_fallback_fps_when_zero(tmp_path: Path) -> None:
 # ---------------------------------------------------------------------------
 
 
-def test_sample_frames_yields_at_correct_step(tmp_path: Path) -> None:
+def test_sample_frames_yields_at_correct_step(tmp_path) -> None:
     fake_video = tmp_path / "clip.mp4"
     fake_video.write_bytes(b"fake")
 
@@ -109,7 +108,7 @@ def test_sample_frames_yields_at_correct_step(tmp_path: Path) -> None:
     mock_cv2.VideoCapture.return_value.release.assert_called_once()
 
 
-def test_sample_frames_empty_video(tmp_path: Path) -> None:
+def test_sample_frames_empty_video(tmp_path) -> None:
     fake_video = tmp_path / "empty.mp4"
     fake_video.write_bytes(b"fake")
 
@@ -176,7 +175,7 @@ def test_detect_returns_empty_frame_on_no_detections() -> None:
             del sys.modules["pitchmind.pipeline.stages.detect"]
         from pitchmind.pipeline.stages.detect import detect
 
-        result = detect(frames_iter, mock_detector, batch_size=16)
+        detect(frames_iter, mock_detector, batch_size=16)
 
     # No detections → early-return empty DataFrame with explicit columns
     mock_pd.DataFrame.assert_called_once()

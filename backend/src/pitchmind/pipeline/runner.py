@@ -3,21 +3,21 @@ from __future__ import annotations
 import tempfile
 import uuid
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import structlog
 from sqlalchemy import select, update
-from sqlalchemy.engine import Engine
 
 from pitchmind.config import settings
 from pitchmind.db.models.video_upload import VideoUpload
+
+if TYPE_CHECKING:
+    from sqlalchemy.engine import Engine
 
 log = structlog.get_logger(__name__)
 
 
 def run_pipeline(upload_id: str, engine: Engine) -> None:
-    import pandas as pd  # lazy — requires cv extras
-
     from pitchmind.cv.detectors.yolov11 import YoloV11Detector
     from pitchmind.pipeline.stages.detect import detect
     from pitchmind.pipeline.stages.probe import probe

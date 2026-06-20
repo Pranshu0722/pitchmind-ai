@@ -22,7 +22,7 @@ class YoloV11Detector:
     ) -> list[Detection]:
         results = self._model.predict(frames, device=self._device, verbose=False)
         detections: list[Detection] = []
-        for result, (fidx, ts) in zip(results, frame_meta):
+        for result, (fidx, ts) in zip(results, frame_meta, strict=True):
             for box in result.boxes:
                 detections.append(
                     Detection(
