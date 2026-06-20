@@ -7,8 +7,8 @@ so this file runs under `uv sync --dev` (no cv extras required).
 from __future__ import annotations
 
 import sys
-from unittest.mock import MagicMock, patch
 import uuid
+from unittest.mock import MagicMock, patch
 
 import pytest
 
