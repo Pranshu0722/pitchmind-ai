@@ -1,7 +1,7 @@
 # System Architecture — PitchMind AI
 
 **Version:** 0.2 (Active)
-**Status:** Approved — implementation in progress (Phases 1–5 complete)
+**Status:** Approved — implementation in progress (Phases 1–5 + rate limiting + Dramatiq complete; Phase 6 starting)
 
 This document describes the system, data, API, agent, ML, CV, deployment, security, and monitoring architecture. Trade-offs and alternative choices are captured in `TECH_REVIEW.md`. Phase-by-phase build order is in `ROADMAP.md`.
 

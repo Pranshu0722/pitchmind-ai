@@ -10,17 +10,17 @@ PitchMind AI ingests football match video and produces tactical, statistical, an
 
 | Item | Value |
 | --- | --- |
-| Current phase | Phase 5 complete — Video Upload Pipeline |
-| Version | 0.5.0-dev |
+| Current phase | Phase 6 — Computer Vision Engine (starting) |
+| Version | 0.6.0-dev |
 | MVP target | Phases 1 – 13 (see `ROADMAP.md`) |
-| Backend | FastAPI + PostgreSQL + MinIO — auth, domain models, video upload live |
+| Backend | FastAPI + PostgreSQL + MinIO + Redis — auth, domain models, video upload, rate limiting, Dramatiq worker |
 | Frontend | React + Vite + Tailwind scaffold (placeholder; full UI in Phase 13) |
-| Tests | 47 passing (8 unit + 39 integration) |
+| Tests | 49 passing (8 unit + 41 integration) |
 | CI | GitHub Actions — Python 3.11/3.12 matrix, PostgreSQL + Redis + MinIO |
 
 ---
 
-## What's Live (Phases 1–5)
+## What's Live (Phases 1–5 + tech debt)
 
 The backend API is fully functional. Start the stack and open `http://localhost:8000/docs` to explore.
 
@@ -46,11 +46,14 @@ The backend API is fully functional. Start the stack and open `http://localhost:
 ### Video Uploads (`/api/v1/videos/`)
 | Method | Endpoint | Description |
 | --- | --- | --- |
-| POST | `/videos/` | Upload video file (mp4/avi/quicktime/webm, max 2 GB) |
+| POST | `/videos/` | Upload video file (mp4/avi/quicktime/webm, max 2 GB) — rate-limited; enqueues `process_video` worker |
 | GET | `/videos/` | List uploads (filter by match, status) |
 | GET | `/videos/{id}` | Get upload record |
 | GET | `/videos/{id}/download` | Generate pre-signed download URL |
 | DELETE | `/videos/{id}` | Delete upload + storage object (admin only) |
+
+### Rate Limiting
+All auth endpoints (`/login`, `/register`) and video uploads are rate-limited via slowapi + Redis. Exceeding the limit returns HTTP 429 with `{"error": {"code": "RATE_LIMIT_EXCEEDED"}}`.
 
 ---
 
@@ -75,12 +78,13 @@ The backend API is fully functional. Start the stack and open `http://localhost:
 
 ## Capabilities
 
-### Live (Phases 1–5)
+### Live (Phases 1–5 + tech debt)
 - User registration, login, JWT auth with role-based access control
 - Football domain: teams, players, matches, match events (full CRUD)
 - Match video upload to MinIO object storage with pre-signed download URLs
-- 47 tests (8 unit + 39 integration) — all passing
-- GitHub Actions CI: Python 3.11 + 3.12 matrix, PostgreSQL + Redis + MinIO
+- Rate limiting on auth + upload endpoints (slowapi + Redis; HTTP 429 on breach)
+- Dramatiq background worker — `process_video` actor enqueued on every upload (PENDING → PROCESSING → READY/FAILED)
+- 49 tests (8 unit + 41 integration) — all passing, CI green
 
 ### Planned — MVP (Phases 6–13)
 - YOLOv11 player + ball detection (Phase 6)
@@ -145,15 +149,18 @@ uv sync --dev
 # 3. Apply database migrations
 uv run alembic upgrade head
 
-# 4. Start the API server
+# 4. Start the API server (terminal 1)
 uv run uvicorn pitchmind.main:app --reload
 
-# 5. Explore the API
+# 5. Start the background worker (terminal 2)
+uv run dramatiq pitchmind.queue.tasks --queues video
+
+# 6. Explore the API
 #    Swagger UI    → http://localhost:8000/docs
 #    ReDoc         → http://localhost:8000/redoc
 #    MinIO console → http://localhost:9001  (login: minioadmin / minioadmin)
 
-# 6. Run the full test suite
+# 7. Run the full test suite
 uv run pytest -v
 ```
 

@@ -28,7 +28,7 @@ All commits must use this exact identity. No changes without explicit re-confirm
 | 3 | Frontend Foundation | ⚡ Partial | 2026-06-16 | — |
 | 4 | Database Design & Domain Models | ✅ Complete | 2026-06-17 | 2026-06-17 |
 | 5 | Video Upload Pipeline | ✅ Complete | 2026-06-17 | 2026-06-18 |
-| 6 | Computer Vision Engine | ⬜ Not Started | — | — |
+| 6 | Computer Vision Engine | ⚡ In Progress | 2026-06-20 | — |
 | 7 | Player Tracking | ⬜ Not Started | — | — |
 | 8 | Heatmaps & Analytics | ⬜ Not Started | — | — |
 | 9 | Match Outcome Prediction | ⬜ Not Started | — | — |
@@ -194,7 +194,8 @@ All commits must use this exact identity. No changes without explicit re-confirm
 | Initial commit pushed to GitHub | ✅ Done | 2026-06-15 |
 | Phase 1–2 complete (auth + CI) | ✅ Done | 2026-06-16 |
 | Phase 4–5 complete (domain models + video upload) | ✅ Done | 2026-06-18 |
-| `v0.1.0` (Phases 1–5 backend core) | 🟡 In Progress | — |
+| Tech debt resolved (rate limiting + Dramatiq) | ✅ Done | 2026-06-20 |
+| `v0.1.0` (Phases 1–5 + rate limiting + Dramatiq) | 🟡 In Progress | — |
 | `v0.2.0` (Phases 6–8: CV + tracking + heatmaps) | ⬜ Not started | — |
 | `v0.3.0` (MVP path + agents) | ⬜ Not started | — |
 | `v1.0.0` MVP launch | ⬜ Not started | — |

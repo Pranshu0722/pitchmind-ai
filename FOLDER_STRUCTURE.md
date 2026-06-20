@@ -1,7 +1,7 @@
 # Folder Structure — PitchMind AI
 
 **Version:** 0.2 (Active)
-**Status:** Partially implemented — Phases 1–5 complete. Legend: ✅ exists · 📋 planned
+**Status:** Partially implemented — Phases 1–5 + tech debt complete. Legend: ✅ exists · 📋 planned
 
 A pragmatic monorepo: one repo, multiple deployables, shared tooling. No micro-package overhead, but cleanly separated concerns.
 
@@ -73,16 +73,19 @@ PitchMind-AI/
 │   │       ├── 0002_domain_models.py        ✅
 │   │       ├── 0003_video_uploads.py        ✅
 │   │       └── 0004_...                     📋 (pgvector, Phase 8)
+│   ├── worker.py                         ✅  Dramatiq entry point (uv run dramatiq pitchmind.queue.tasks)
 │   ├── tests/
 │   │   ├── conftest.py                   ✅
 │   │   ├── unit/
+│   │   │   ├── conftest.py               ✅  AsyncMock redis for ASGITransport tests
 │   │   │   ├── test_security.py          ✅  (6 tests)
 │   │   │   └── test_health.py            ✅  (2 tests)
 │   │   └── integration/
 │   │       ├── conftest.py               ✅
 │   │       ├── test_auth.py              ✅  (14 tests)
 │   │       ├── test_domain.py            ✅  (15 tests)
-│   │       └── test_video_uploads.py     ✅  (10 tests)
+│   │       ├── test_video_uploads.py     ✅  (10 tests)
+│   │       └── test_rate_limit.py        ✅  (2 tests — 429 on /login after burst)
 │   └── src/
 │       └── pitchmind/
 │           ├── __init__.py               ✅
@@ -93,6 +96,7 @@ PitchMind-AI/
 │           ├── telemetry.py              📋 OTEL setup (Phase 2 follow-up)
 │           ├── api/
 │           │   ├── errors.py             ✅  global exception handlers
+│           │   ├── limiter.py            ✅  slowapi Limiter (Redis-backed, swallow_errors=True)
 │           │   └── v1/
 │           │       ├── __init__.py       ✅  router registration
 │           │       ├── routes/
@@ -115,7 +119,6 @@ PitchMind-AI/
 │           ├── core/
 │           │   ├── security.py           ✅  argon2id hashing + JWT tokens
 │           │   ├── deps.py               ✅  get_current_user, require_role
-│           │   ├── rate_limit.py         📋 slowapi (Phase 2 follow-up)
 │           │   └── pagination.py         📋
 │           ├── db/
 │           │   ├── base.py               ✅  Base + TimestampMixin
@@ -139,8 +142,9 @@ PitchMind-AI/
 │           │   ├── __init__.py           ✅
 │           │   └── client.py             ✅  async S3/MinIO: upload, presign, delete
 │           ├── queue/
-│           │   ├── broker.py             📋 Dramatiq broker setup
-│           │   └── tasks.py              📋 task definitions
+│           │   ├── __init__.py           ✅  package marker
+│           │   ├── broker.py             ✅  RedisBroker + Retries middleware
+│           │   └── tasks.py              ✅  process_video actor (PENDING→PROCESSING→READY/FAILED)
 │           ├── pipeline/                 📋 (Phase 6)
 │           │   ├── states.py
 │           │   ├── stages/
