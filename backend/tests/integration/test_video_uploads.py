@@ -52,7 +52,7 @@ async def test_upload_video_success(client: AsyncClient, db):
     data = resp.json()
     assert data["filename"] == "test.mp4"
     assert data["content_type"] == "video/mp4"
-    assert data["status"] == "READY"
+    assert data["status"] == "PENDING"
     assert data["file_size_bytes"] == len(SMALL_VIDEO)
 
 
