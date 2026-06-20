@@ -2,15 +2,19 @@ import uuid
 from datetime import UTC, datetime
 
 import structlog
-from fastapi import APIRouter, Depends, HTTPException, Query, UploadFile, status
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, UploadFile, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from pitchmind.api.limiter import limiter
 from pitchmind.api.v1.schemas.video_upload import PresignedUrlResponse, VideoUploadResponse
+from pitchmind.config import settings
 from pitchmind.core.deps import get_current_user, require_role
 from pitchmind.db.models.user import User, UserRole
 from pitchmind.db.models.video_upload import UploadStatus, VideoUpload
 from pitchmind.db.session import get_db
+from pitchmind.queue import broker as _broker  # noqa: F401 — registers Dramatiq broker
+from pitchmind.queue.tasks import process_video
 from pitchmind.storage import client as storage
 
 log = structlog.get_logger(__name__)
@@ -21,7 +25,9 @@ ALLOWED_CONTENT_TYPES = {"video/mp4", "video/x-msvideo", "video/quicktime", "vid
 
 
 @router.post("/", response_model=VideoUploadResponse, status_code=status.HTTP_201_CREATED)
+@limiter.limit(settings.rate_limit_upload)
 async def upload_video(
+    request: Request,
     file: UploadFile,
     match_id: uuid.UUID | None = Query(default=None),
     current_user: User = Depends(get_current_user),
@@ -53,10 +59,11 @@ async def upload_video(
         storage_key=key,
         file_size_bytes=len(data),
         content_type=file.content_type,
-        status=UploadStatus.READY,
+        status=UploadStatus.PENDING,
     )
     db.add(record)
     await db.flush()
+    process_video.send(str(record.id))
     log.info("video.uploaded", upload_id=str(record.id), key=key, size=len(data))
     return record
 

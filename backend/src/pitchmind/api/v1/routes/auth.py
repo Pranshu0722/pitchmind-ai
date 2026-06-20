@@ -8,6 +8,7 @@ from jose import JWTError
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from pitchmind.api.limiter import limiter
 from pitchmind.api.v1.schemas.auth import (
     LoginRequest,
     RefreshRequest,
@@ -15,6 +16,7 @@ from pitchmind.api.v1.schemas.auth import (
     TokenResponse,
     UserResponse,
 )
+from pitchmind.config import settings
 from pitchmind.core.deps import get_current_user
 from pitchmind.core.security import (
     create_access_token,
@@ -54,6 +56,7 @@ async def _audit(
 
 
 @router.post("/register", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
+@limiter.limit(settings.rate_limit_default)
 async def register(
     body: RegisterRequest, request: Request, db: AsyncSession = Depends(get_db)
 ) -> User:
@@ -76,6 +79,7 @@ async def register(
 
 
 @router.post("/login", response_model=TokenResponse)
+@limiter.limit(settings.rate_limit_default)
 async def login(
     body: LoginRequest, request: Request, db: AsyncSession = Depends(get_db)
 ) -> TokenResponse:

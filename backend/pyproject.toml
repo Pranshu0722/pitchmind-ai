@@ -39,6 +39,8 @@ dependencies = [
   "httpx>=0.28.0",
   # Rate limiting
   "slowapi>=0.1.9",
+  # Sync DB driver for Dramatiq workers (cannot use asyncpg)
+  "psycopg2-binary>=2.9.0",
   # Observability
   "structlog>=24.4.0",
   "opentelemetry-sdk>=1.29.0",
