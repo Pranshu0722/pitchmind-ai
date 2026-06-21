@@ -96,7 +96,5 @@ def _update_duration(upload_id: str, duration_s: float, engine: Engine) -> None:
 def _update_meta(upload_id: str, meta: dict[str, Any], engine: Engine) -> None:
     with engine.begin() as conn:
         conn.execute(
-            update(VideoUpload)
-            .where(VideoUpload.id == uuid.UUID(upload_id))
-            .values(meta=meta)
+            update(VideoUpload).where(VideoUpload.id == uuid.UUID(upload_id)).values(meta=meta)
         )

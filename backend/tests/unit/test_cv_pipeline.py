@@ -86,9 +86,9 @@ def test_sample_frames_yields_at_correct_step(tmp_path) -> None:
     mock_cv2 = _make_cv2_mock(fps=25.0)
     fake_frame = MagicMock()
     # 50 real frames, then EOF
-    mock_cv2.VideoCapture.return_value.read.side_effect = (
-        [(True, fake_frame)] * 50 + [(False, None)]
-    )
+    mock_cv2.VideoCapture.return_value.read.side_effect = [(True, fake_frame)] * 50 + [
+        (False, None)
+    ]
 
     with patch.dict(sys.modules, {"cv2": mock_cv2}):
         if "pitchmind.pipeline.stages.sample" in sys.modules:
@@ -133,8 +133,15 @@ def test_detect_batches_correctly_and_flushes_partial() -> None:
     from pitchmind.cv.detectors.base import Detection
 
     fake_det = Detection(
-        frame_idx=0, timestamp_s=0.0, cls=0, cls_name="player",
-        conf=0.9, x1=0.0, y1=0.0, x2=100.0, y2=100.0,
+        frame_idx=0,
+        timestamp_s=0.0,
+        cls=0,
+        cls_name="player",
+        conf=0.9,
+        x1=0.0,
+        y1=0.0,
+        x2=100.0,
+        y2=100.0,
     )
     mock_detector = MagicMock()
     mock_detector.predict.return_value = [fake_det]
@@ -195,9 +202,7 @@ def test_runner_calls_stages_and_updates_db() -> None:
     fake_df.__len__ = MagicMock(return_value=5)
     fake_df.empty = False
     # df["frame_idx"].nunique() must return an int so int() doesn't fail
-    fake_df.__getitem__ = MagicMock(
-        return_value=MagicMock(nunique=MagicMock(return_value=3))
-    )
+    fake_df.__getitem__ = MagicMock(return_value=MagicMock(nunique=MagicMock(return_value=3)))
 
     mock_probe_mod = MagicMock()
     mock_probe_mod.probe.return_value = probe_result
