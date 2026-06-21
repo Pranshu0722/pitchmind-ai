@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import asdict
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     from collections.abc import Iterator
@@ -19,8 +19,8 @@ def detect(
 ) -> pd.DataFrame:
     import pandas as pd  # lazy — requires cv extras
 
-    all_detections: list = []
-    batch_imgs: list = []
+    all_detections: list[Any] = []
+    batch_imgs: list[Any] = []
     batch_meta: list[tuple[int, float]] = []
 
     for idx, ts, img in frame_iter:
