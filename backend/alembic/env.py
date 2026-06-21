@@ -9,8 +9,8 @@ config = context.config
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
-from pitchmind.db.base import Base  # noqa: E402, F401
 import pitchmind.db.models  # noqa: E402, F401
+from pitchmind.db.base import Base  # noqa: E402, F401
 
 target_metadata = Base.metadata
 

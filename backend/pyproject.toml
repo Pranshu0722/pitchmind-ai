@@ -141,6 +141,7 @@ ignore = [
 "tests/**/*.py" = ["ANN", "S101"]
 "src/pitchmind/api/**/*.py" = ["ANN"]
 "src/pitchmind/core/deps.py" = ["ANN"]
+"alembic/**/*.py" = ["ANN", "E501"]
 
 [tool.mypy]
 python_version = "3.11"

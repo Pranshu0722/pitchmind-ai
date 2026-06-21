@@ -3767,6 +3767,7 @@ all = [
     { name = "opencv-python-headless" },
     { name = "optuna" },
     { name = "pandas" },
+    { name = "pyarrow" },
     { name = "scikit-learn" },
     { name = "scipy" },
     { name = "sentence-transformers" },
@@ -3779,6 +3780,7 @@ cv = [
     { name = "numpy" },
     { name = "opencv-python-headless" },
     { name = "pandas" },
+    { name = "pyarrow" },
     { name = "scipy" },
     { name = "ultralytics" },
 ]
@@ -3847,6 +3849,7 @@ requires-dist = [
     { name = "pitchmind", extras = ["cv", "ml", "agents"], marker = "extra == 'all'" },
     { name = "prometheus-fastapi-instrumentator", specifier = ">=7.0.0" },
     { name = "psycopg2-binary", specifier = ">=2.9.0" },
+    { name = "pyarrow", marker = "extra == 'cv'", specifier = ">=18.0.0" },
     { name = "pydantic", specifier = ">=2.10.0" },
     { name = "pydantic-settings", specifier = ">=2.14.2" },
     { name = "python-jose", extras = ["cryptography"], specifier = ">=3.3.0" },
